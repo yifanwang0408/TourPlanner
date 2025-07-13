@@ -20,7 +20,7 @@ class LLM:
 
     def setup(self, model_name="gpt-4.1-mini", **params):
         """setup the llm api with given params"""
-        self.llm = ChatOpenAI(model_name=model_name, openai_api_key=self._api_key, *params)
+        self.llm = ChatOpenAI(model_name=model_name, openai_api_key=self._api_key, **params)
 
     def chat(self, message):
         return self.llm(message)

@@ -1,7 +1,7 @@
 from langchain.tools import tool
 from prompt import prompt1
 import json
-from langchain.prompts import PromptTemplate
+from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 
 @tool
 def validate_user_input(llm, input_schema, user_input):
@@ -13,32 +13,42 @@ def validate_user_input(llm, input_schema, user_input):
         input_schema: the schema of the input
 
     Return:
-        A string indicating 'valid' or 'invalid' along with parsed data or error message.
+        A True if the user input along with parsed data if user input is valid, or a False with error message if invalid.
     """
 
     schema_str = json.dumps(input_schema, indent=2)
-    system_prompt_template = PromptTemplate(
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate(
         input_variables=["schema_str"],
         template =  prompt1
     )
+    #user prompt
+    user_prompt_template = HumanMessagePromptTemplate(
+        input_variables=["user_input"],
+        template ="{user_input}"
+    )
 
-    message = [
-        {
-            "role": "system",
-            "content": system_prompt_template.format(schema_str=schema_str)
-        },
-        {
-            "role": "user",
-            "content": user_input
-        }
-    ]
+    prompt = ChatPromptTemplate.from_messages([system_prompt_template, user_prompt_template])
+    
+    chain = (
+        {   "schema_str": lambda x: x["schema_str"],
+            "user_input": lambda x: x["user_input"]
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: json.loads(x.content)} #because prompt1 ask it to direcly only output in json
+    )
+    response = chain.invoke({"schema_str": schema_str, "user_input": user_input})
+    
+    parsed_input = response["response"]
 
-    response = llm(message)
-    content = response["choice"][0]["message"]["content"]
-    parsed_input = json.loads(content)
     if parsed_input["data"] is None:
-        return "invalid", parsed_input["message"]
-    return "valid", parsed_input["data"]
+        return False, parsed_input["message"]
+    else:
+        return True, parsed_input["data"]
+
+
+    
 
     
     
