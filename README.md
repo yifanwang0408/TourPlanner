@@ -1,12 +1,15 @@
 # TourPlanner
 Tour Planner using LLMs
+
 ---
 # Background:
 Travel and tours appeal to a vast global market, with millions, if not billions, of individuals embarking on trips, vacations, and business travel annually. Despite the widespread desire to explore, the process of planning a trip is frequently characterized by significant challenges and confusion, particularly for those new to independent travelers. There are many variables that one needs to account for and it can get hectic and strenuous to keep track of everything.
+
 ---
 # Problem:
 Planning a personalized and efficient trip is a complex and often overwhelming task, particularly for new or independent travelers. With countless variables to consider — such as destinations, transportation, accommodation, weather, budgets, interests, and timing — travelers are required to navigate multiple platforms, compare scattered information, and make difficult trade-offs.
 This process is often time-consuming, fragmented, and lacks personalization. Existing tools either rely on static templates or provide generic suggestions that do not adapt dynamically to user preferences, changes, or real-time conditions. Furthermore, most applications fail to offer intuitive interactions or explain why certain plans or recommendations are made, limiting user trust and satisfaction.
+
 ---
 # Solution:
 We propose the development of an AI-powered Travel Planning Assistant that leverages a Large Language Model (LLM) to generate personalized, context-aware, and adaptable travel itineraries through natural language interaction.
