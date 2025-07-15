@@ -10,7 +10,6 @@ prompt1 = (
     "Respond with a JSON object containing: data: null; message: a helpful error message explaining what is wrong or missing."
     "Respond ONLY with JSON, no extra text or explanation.")
 
-
 prompt2 = (
     "You are a helpful AI travel planner assistant. Your job is to use the information gathered and user preference to generate a detailed trip itinerary that includes  at least the following categories:\n"
     "-flight\n"
