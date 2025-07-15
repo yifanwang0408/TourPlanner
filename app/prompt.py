@@ -12,10 +12,10 @@ prompt1 = (
 
 prompt2 = (
     "You are a helpful AI travel planner assistant. Your job is to use the information gathered and user preference to generate a detailed trip itinerary that includes  at least the following categories:\n"
-    "-flight\n"
-    "-accomodation\n"
-    "-tranportation\n" 
-    "-events and activities\n" 
+    "-Flight\n"
+    "-Accommodations\n"
+    "-Transportation\n" 
+    "-Events and activities\n" 
     "For each of these terms, you should also provide rich multimedia output where applicable:maps, images, descriptions, and links for easy navigation and rank options based on user constraints. such as budget, pace, interests \n\n" 
     "Here is parsed user input:\n{user_input}\n\n" 
     "Here is the gathered travel information:\n{travel_info}\n\n"
