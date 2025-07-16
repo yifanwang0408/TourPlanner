@@ -1,0 +1,26 @@
+{
+    "$schema":"http://json-schema.org/draft-07/schema#",
+    "title": "Tour Planner User Input",
+    "properties": 
+    {
+        "destination":
+        {
+            "description": "The destination of the trip",
+            "type": "string",
+            "minimum": 1
+        },
+        "start_date":
+        {
+            "description": "The start date of the trip",
+            "type": "string",
+            "format": "date"          
+        },
+        "end_date":
+        {
+            "description": "The end date of the trip",
+            "type": "string",
+            "format": "date"
+        }
+    },
+    "required":["destination", "start_date","end_date"]
+}

@@ -3,7 +3,7 @@ from prompt import prompt1
 import json
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 
-@tool
+
 def validate_user_input(llm, input_schema, user_input):
     """parse user input and validate it, return the parsed input if it is valid
     
@@ -16,19 +16,18 @@ def validate_user_input(llm, input_schema, user_input):
         A True if the user input along with parsed data if user input is valid, or a False with error message if invalid.
     """
 
-    schema_str = json.dumps(input_schema, indent=2)
+    with open(input_schema, "r") as f:
+        schema_str = json.load(f)
+    
     #system prompt
-    system_prompt_template = SystemMessagePromptTemplate(
-        input_variables=["schema_str"],
-        template =  prompt1
-    )
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt1)
     #user prompt
-    user_prompt_template = HumanMessagePromptTemplate(
-        input_variables=["user_input"],
-        template ="{user_input}"
-    )
+    user_prompt_template = HumanMessagePromptTemplate.from_template("{user_input}")
 
-    prompt = ChatPromptTemplate.from_messages([system_prompt_template, user_prompt_template])
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+        user_prompt_template
+    ])
     
     chain = (
         {   "schema_str": lambda x: x["schema_str"],
