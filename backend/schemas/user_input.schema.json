@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tour Planner User Input",
+  "type": "object",
+  "properties": {
+    "origin": {
+      "description": "The starting point of the trip",
+      "type": "string",
+      "minLength": 1
+    },
+    "destination": {
+      "description": "The destination of the trip",
+      "type": "string",
+      "minLength": 1
+    },
+    "start_date": {
+      "description": "The start date of the trip",
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "description": "The end date of the trip",
+      "type": "string",
+      "format": "date"
+    },
+    "budget_num": {
+      "description": "The budget of the trip",
+      "type": "integer",
+      "default": 2000
+    },
+    "transportation_preference": {
+      "description": "Preferred transportation to the destination",
+      "type": "string",
+      "enum": ["flight", "train", "bus", "car", "other"]
+    },
+    "local_transportation_preference": {
+      "description": "Whether user wants a rental car or prefers public transport",
+      "type": "boolean",
+      "default": false
+    },
+    "budget_priority": {
+      "description": "User's budget priority",
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "accommodation": {
+      "description": "Accommodation preferences",
+      "type": "object",
+      "properties": {
+        "room_type": {
+          "type": "string",
+          "default": "double",
+          "enum": ["single", "double", "suite", "other"]
+        },
+        "accommodation_type": {
+          "type": "string",
+          "default": "hotel",
+          "enum": ["hotel", "motel", "hostel", "Airbnb", "other"]
+        },
+        "hotel_rating": {
+          "type": "integer",
+          "default": 3,
+          "enum": [1, 2, 3, 4, 5]
+        }
+      }
+    },
+    "interests": {
+      "description": "User interests",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["food", "shopping", "museums", "nature", "adventure", "local event", "other"]
+      }
+    }
+  },
+  "required": ["origin", "destination", "start_date", "end_date"],
+  "if": {
+    "properties": {
+      "accommodation": {
+        "properties": {
+          "accommodation_type": { "const": "hotel" }
+        }
+      }
+    }
+  },
+  "then": {
+    "required": ["accommodation"],
+    "properties": {
+      "accommodation": {
+        "required": ["hotel_rating"]
+      }
+    }
+  }
+}

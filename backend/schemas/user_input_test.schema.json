@@ -1,0 +1,30 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "title": "Tour Planner User Input",
+  "type": "object",
+  "properties": {
+    "origin": {
+      "type": "string",
+      "description": "Starting city"
+    },
+    "destination": {
+      "type": "string",
+      "description": "Destination city"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Trip start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Trip end date"
+    },
+    "budget": {
+      "type": "number",
+      "description": "Budget in USD"
+    }
+  },
+  "required": ["origin", "destination", "start_date", "end_date"]
+}
