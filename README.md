@@ -26,5 +26,5 @@ Support multilingual input and output
 - Continuously learn from user interactions to improve plan quality
 - This solution offers an intuitive, intelligent, and enjoyable travel planning experience — transforming trip planning from a fragmented chore into an interactive, insightful, and empowering process.
 
-![flow chart image](backend/tourplanner_flowchart.png)
+![flow chart image](images/tourplanner_flowchart.png)
 
