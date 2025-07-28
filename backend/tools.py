@@ -1,7 +1,8 @@
 from langchain.tools import tool
-from prompt import prompt1, prompt2, prompt3, prompt4
+from prompt import prompt1, prompt2
 import json
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
+from datetime import date
 from llm import LLM
 
 def validate_user_input(llm, input_schema, user_input):
@@ -19,6 +20,9 @@ def validate_user_input(llm, input_schema, user_input):
     with open(input_schema, "r") as f:
         schema_str = json.load(f)
     
+    
+    today_str = date.today().isoformat()
+    
     #system prompt
     system_prompt_template = SystemMessagePromptTemplate.from_template(prompt1)
     #user prompt
@@ -31,21 +35,22 @@ def validate_user_input(llm, input_schema, user_input):
     
     chain = (
         {   "schema_str": lambda x: x["schema_str"],
+            "today_str": lambda x: x["today_str"],
             "user_input": lambda x: x["user_input"]
         } 
         | prompt 
         | llm
-        | {"response": lambda x: json.loads(x.content)} #because prompt1 ask it to direcly only output in json
+        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
     )
-    response = chain.invoke({"schema_str": schema_str, "user_input": user_input})
-    
-    parsed_input = response["response"]
+    response = chain.invoke({"schema_str": schema_str, "today_str": today_str,"user_input": user_input})
+    parsed_input = json.loads(response["response"])
 
     if parsed_input["data"] is None:
         return False, parsed_input["message"]
     else:
         return True, parsed_input["data"]
     
+
 def generate_plan(llm: LLM, user_input: str, parsed_input: dict, travel_info: dict) -> str:
     """
     The function call LLM with collected travel_info and user input to generate a plan for user

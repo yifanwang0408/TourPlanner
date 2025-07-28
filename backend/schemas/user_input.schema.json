@@ -1,95 +1,153 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Tour Planner User Input",
-  "type": "object",
-  "properties": {
-    "origin": {
-      "description": "The starting point of the trip",
-      "type": "string",
-      "minLength": 1
-    },
-    "destination": {
-      "description": "The destination of the trip",
-      "type": "string",
-      "minLength": 1
-    },
-    "start_date": {
-      "description": "The start date of the trip",
-      "type": "string",
-      "format": "date"
-    },
-    "end_date": {
-      "description": "The end date of the trip",
-      "type": "string",
-      "format": "date"
-    },
-    "budget_num": {
-      "description": "The budget of the trip",
-      "type": "integer",
-      "default": 2000
-    },
-    "transportation_preference": {
-      "description": "Preferred transportation to the destination",
-      "type": "string",
-      "enum": ["flight", "train", "bus", "car", "other"]
-    },
-    "local_transportation_preference": {
-      "description": "Whether user wants a rental car or prefers public transport",
-      "type": "boolean",
-      "default": false
-    },
-    "budget_priority": {
-      "description": "User's budget priority",
-      "type": "string",
-      "enum": ["low", "medium", "high"]
-    },
-    "accommodation": {
-      "description": "Accommodation preferences",
-      "type": "object",
-      "properties": {
-        "room_type": {
+    "$schema":"http://json-schema.org/draft-07/schema#",
+    "title": "Tour Planner User Input",
+    "properties": 
+    {
+        "origin": {
           "type": "string",
-          "default": "double",
-          "enum": ["single", "double", "suite", "other"]
+          "description": "Starting city"
         },
-        "accommodation_type": {
-          "type": "string",
-          "default": "hotel",
-          "enum": ["hotel", "motel", "hostel", "Airbnb", "other"]
+        "destination":
+        {
+            "description": "The destination of the trip",
+            "type": "string",
+            "minimum": 1
         },
-        "hotel_rating": {
-          "type": "integer",
-          "default": 3,
-          "enum": [1, 2, 3, 4, 5]
+        "start_date":
+        {
+            "description": "The start date of the trip",
+            "type": "string",
+            "format": "date"          
+        },
+        "end_date":
+        {
+            "description": "The end date of the trip",
+            "type": "string",
+            "format": "date"
+        },
+        "cities":
+        {
+            "description": "The cities of the trip",
+            "type": "array",
+            "items":
+            {  
+                "type": "string",
+                "minimum": 1
+            }
+        },
+        "flights":
+        {
+            "description": "The flights of the trip",
+            "type": "array",
+            "items":
+            {
+                "type": "object",
+                "properties":    
+                {
+                    "departure_iata":
+                    {
+                      "description": "The departure airport IATA code of ther flight",
+                      "type": "string"
+                    },
+                    "arrival_iata":
+                    {
+                      "description": "The arrival airport IATA code of the flight",
+                      "type": "string"
+                    },
+                    "departure_date":
+                    {
+                      "description": "The departure date of ther flight",
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "arrival_date":
+                    {
+                        "description": "The arrival date of ther flight",
+                        "type": "string",
+                        "format": "date"
+                    }
+                }         
+            }
+        },
+        "daily_plan":
+        {
+            "description": "details for each day of the trip",
+            "type": "array",
+            "items":
+            {
+                "type": "object",
+                "properties":
+                {
+                    "city":
+                    {
+                        "type": "string"
+                    },
+                    "country_code":
+                    {
+                        "type": "string"
+                    },
+                    "start_date_city":
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "end_date_city":
+                    {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "traveler_number":
+                    {
+                        "description": "The number of travelers",
+                        "type": "integer",
+                        "default": 1
+                    },
+                    "accomondation":
+                    {
+                        "description": "the accomodation user like to live in",
+                        "type": "object",
+                        "properties":
+                        {
+                            "room_type":
+                            {
+                                "type": "string",
+                                "default": "double",
+                                "enum": ["single", "double", "suite", "other"]
+                            },
+                            "accommodation_type":
+                            {
+                                "type":"string",
+                                "default": "hotel",
+                                "enum": ["hotel", "motel", "hostel", "Airbnb", "other"]
+                            },
+                            "hotel_accomodation_type":
+                            {
+                                "description": "whether the hotel accomodation type is default",
+                                "type": "boolean",
+                                "default": true
+                            },
+                            "hotel_rating":
+                            {
+                                "type": "integer",
+                                "default": "3",
+                                "enum": [1,2,3,4,5]
+                            },
+                            "default_rating":
+                            {
+                                "description": "whether the hotel rating is default",
+                                "type": "boolean",
+                                "default": true
+                            },
+                            "hotel_name":
+                            {
+                                "type": "string",
+                                "default": ""
+                            }
+                        }
+                    } 
+                }
+            }
         }
-      }
     },
-    "interests": {
-      "description": "User interests",
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "enum": ["food", "shopping", "museums", "nature", "adventure", "local event", "other"]
-      }
-    }
-  },
-  "required": ["origin", "destination", "start_date", "end_date"],
-  "if": {
-    "properties": {
-      "accommodation": {
-        "properties": {
-          "accommodation_type": { "const": "hotel" }
-        }
-      }
-    }
-  },
-  "then": {
-    "required": ["accommodation"],
-    "properties": {
-      "accommodation": {
-        "required": ["hotel_rating"]
-      }
-    }
-  }
+    "required":["origin","destination", "start_date","end_date"]
 }

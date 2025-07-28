@@ -3,6 +3,9 @@ weather_input_prompt = {"city": "Enter city: "}
 direction_input_prompt = {"start_lon": "Enter start longitude: ", "start_lat": "Enter start latitude: ", "end_lon": "Enter end longitude: ", "end_lat": "Enter end latitude: "}
 furture_flight_input_prompt = {"airport": "Enter airport IATA code: ", "flight_type": "Enter flight type (arrival/departure): ", "date": "Enter date (YYYY-MM-DD):"}
 
+from travel_api import FutureFlight_Aviationstack, Hotel_LiteAPI
+import os
+
 
 class Prompt_API_Search():
     def __init__(self):
@@ -49,9 +52,15 @@ class Prompt_API_Search():
         initial prompt for direction
         """
         params = {}
+        """
         params["airport"] = input("Enter airport IATA code: ")
         params["flight_type"] = input("Enter flight type (arrival/departure): ") 
         params["date"] = input("Enter date (YYYY-MM-DD): ")
+        """
+        params["airport_dep"] = input("Enter departure airport IATA code: ")
+        params["airport_arr"] = input("Enter arrival airport IATA code: ")
+        params["date_dep"] = input("Enter departure date (YYYY-MM-DD): ")
+        params["date_arr"] = input("Enter arrival date (YYYY-MM-DD): ")
         return params
 
 
@@ -86,3 +95,32 @@ def process_hotel_query_params(parsed_input, limit = 4, aiSearch = None):
         list_params.append(param)
         city_list.append(day["city"])
     return list_params, city_list
+
+
+def process_flight_quary_params(parsed_input):
+    list_params = []
+    for flight in parsed_input["flights"]:
+        param = {}
+        param["airport_dep"] = flight["departure_iata"]
+        param["airport_arr"] = flight["arrival_iata"]
+        param["date_dep"] = flight["departure_date"]
+        param["date_arr"] = flight["arrival_date"]
+        list_params.append(param)
+    return list_params
+
+def fetch_all_travel_info(data, hotel, flight):
+    travel_info = {}
+    
+    hotel_params, city_list = process_hotel_query_params(data)
+    hotel_list = hotel.get_hotel("https://api.liteapi.travel/v3.0/data/hotels", hotel_params, city_list)
+    travel_info["hotel"] = hotel_list
+
+    flight_params = process_flight_quary_params(data)
+    print(flight_params)
+    flight_list = flight.process_several_flights(flight_params)
+    print(flight_list)
+    travel_info["flight"] = flight_list
+
+    return travel_info
+
+

@@ -30,10 +30,12 @@ def test_travel_apis():
         print("No directions data returned.")
 
     print("\n--- Testing Future Flight Schedules ---")
-    params_flight = {"iata_code": "JFK", "flight_type": "departure", "date": "2025-08-24"}
+    #params_flight = {"iata_code": "JFK", "flight_type": "departure", "date": "2025-08-24"}
+    params_flight = {"airport_dep": "LAX", "airport_arr": "SCL", "date_dep": "2025-09-01", "date_arr": "2025-09-01"}
     flights = furture_flight.get_future_flight_schedules(params_flight)
+    print(flights)
     if flights:
-        print(f"Found {len(flights)} flights departing from JFK on 2025-08-24")
+        print(f"Found {len(flights)} flights departing from LAX on 2025-09-01")
         # Print first flight details
         first_flight = flights[0]
         print(f"First flight info:\n Airline: {first_flight.get('airline', {}).get('name')}\nFlight Number: {first_flight.get('flight', {}).get('iataNumber')}\nDeparture Time: {first_flight.get('departure', {}).get('scheduledTime')}")

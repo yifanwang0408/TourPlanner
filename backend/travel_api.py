@@ -229,13 +229,23 @@ class FutureFlight_Aviationstack(Travel_info):
         Returns:
             list: List of flight schedule dicts or None on error
         """
-        self.base_url = "https://api.aviationstack.com/v1/flightsFuture"
+        #self.base_url = "https://api.aviationstack.com/v1/flightsFuture"
+        self.base_url = "https://api.aviationstack.com/v1/flights"
+        params = {
+            "access_key": AVIATIONSTACK_API_KEY,
+            "dep_iata": params["airport_dep"],
+            "arr_iata": params["airport_arr"],
+            "dep_date": params["date_dep"],
+            "arr_date": params["date_arr"]
+        }
+        """
         params = {
             "access_key": AVIATIONSTACK_API_KEY,
             "iataCode": params["airport"],
             "type": params["flight_type"],
             "date": params["date"]
         }
+        """
         try:
             response = requests.get(self.base_url, params=params)
             response.raise_for_status()
@@ -244,3 +254,11 @@ class FutureFlight_Aviationstack(Travel_info):
         except requests.exceptions.RequestException as e:
             print(f"Future Flight Schedules API error: {e}")
             return None
+    
+    def process_several_flights(self, params_list: list):
+        flights_output = {} #departure is the key, value is all the flight associated with it
+        for param in params_list:
+            response = self.get_future_flight_schedules(param)
+            flights_output[param["airport_dep"]] = response
+        return flights_output
+

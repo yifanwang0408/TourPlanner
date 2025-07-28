@@ -26,7 +26,7 @@ def main():
 
 
     #user input schema
-    input_schema = "schemas/user_input_test.schema.json"
+    input_schema = "backend/schemas/user_input.schema.json"
 
     while True:
         print("\n--- Tour Planner CLI ---")
@@ -97,6 +97,11 @@ def main():
                 validity, data = tools.validate_user_input(llm.llm, input_schema, user_input)
                 if(validity == False):
                     print(data)
+            print(data)
+            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight)
+            output = tools.generate_plan(llm.llm, user_input, data, travel_info)
+            print(output)
+            
 
         elif choice == "6":
             print("Exiting...")
