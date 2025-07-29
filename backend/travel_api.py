@@ -158,6 +158,7 @@ class Weather_OpenWeatherMap(Travel_info):
         Return:
             Return the json data of fetched info if the api fetch is successful. Otherwise return None
         """
+        
         city_name = params["city"]
         self.base_url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={OWM_API_KEY}&units=metric"
         try:
@@ -174,6 +175,8 @@ class Weather_OpenWeatherMap(Travel_info):
                 return {"error": data.get("message", "City not found.")}
         except requests.exceptions.RequestException as e:
             return {"error": str(e)}
+        
+
 
 # === 3. Directions (OpenRouteService) ===
 class Directions_OpenRouteService(Travel_info):

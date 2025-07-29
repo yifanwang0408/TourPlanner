@@ -78,6 +78,12 @@
                 "type": "object",
                 "properties":
                 {
+                    "date":
+                    {
+                        "description": "The date of the day",
+                        "type": "string",
+                        "format": "date"
+                    },
                     "city":
                     {
                         "type": "string"
@@ -85,6 +91,16 @@
                     "country_code":
                     {
                         "type": "string"
+                    },
+                    "city_lat":
+                    {
+                        "description": "The latitude of the city",
+                        "type": "number"
+                    },
+                    "city_lon":
+                    {
+                        "description": "The longitude of the city",
+                        "type": "number"
                     },
                     "start_date_city":
                     {

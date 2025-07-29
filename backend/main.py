@@ -98,7 +98,7 @@ def main():
                 if(validity == False):
                     print(data)
             print(data)
-            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight)
+            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight, weather)
             output = tools.generate_plan(llm.llm, user_input, data, travel_info)
             print(output)
             

@@ -108,7 +108,19 @@ def process_flight_quary_params(parsed_input):
         list_params.append(param)
     return list_params
 
-def fetch_all_travel_info(data, hotel, flight):
+
+def get_weather_params(data, weather):
+    days = data["daily_plan"]
+    list_params = []
+    for day in days:
+        param = {}
+        param["lat"] = day["city_lat"]
+        param["lon"] = day["city_lon"]
+        param["date"] = day["date"]
+        list_params.append(param)
+    return list_params
+
+def fetch_all_travel_info(data, hotel, flight, weather):
     travel_info = {}
     
     hotel_params, city_list = process_hotel_query_params(data)
@@ -122,5 +134,7 @@ def fetch_all_travel_info(data, hotel, flight):
     travel_info["flight"] = flight_list
 
     return travel_info
+
+
 
 
