@@ -14,7 +14,7 @@ RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "travel-advisor.p.rapidapi.com")
 LITE_API_KEY = os.getenv("LITEAPI_KEY")
 
 AVIATIONSTACK_API_KEY = os.getenv("AVIATIONSTACK_API_KEY")
-FOURSQURE_API_KEY = os.getenv("FOURSQURE_API_KEY")
+FOURSQUARE_API_KEY = os.getenv("FOURSQUARE_API_KEY")
 
 
 
@@ -328,7 +328,7 @@ class Attractions_API(Travel_info):
         headers = {
             "accept": "application/json",
             "X-Places-Api-Version": "2025-06-17",
-            "Authorization": "Bearer HVU3GYFLO3LAL2BSQ4YRFUZVTP4IGLMHVLP3D1V5SVYHCW0X"
+            "Authorization": FOURSQUARE_API_KEY
         }
     
 
