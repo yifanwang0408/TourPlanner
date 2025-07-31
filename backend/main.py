@@ -1,4 +1,4 @@
-from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_OpenWeatherMap, Directions_OpenRouteService, FutureFlight_Aviationstack)
+from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API)
 from llm import LLM
 import tools
 from dotenv import load_dotenv
@@ -16,9 +16,11 @@ def main():
     #set up api to fetch info
     hotel_lite = Hotel_LiteAPI("Hotel Lite API","https://api.liteapi.travel")
     hotel_rapid = Hotel_RapidAPI("Hotel Rapid API")
-    weather = Weather_OpenWeatherMap("Weather Forecast (OpenWeatherMap)")
+    weather = Weather_WeatherAPI("Weather Forecast (OpenWeatherMap)")
     direction = Directions_OpenRouteService("Directions (OpenRouteService)")
     furture_flight = FutureFlight_Aviationstack("Future Flight Schedules (Aviationstack)")
+    attraction_api = Attractions_API("Attractions API")
+
 
     #set up for the prompt class
     search_prompt = utils.Prompt_API_Search()
@@ -34,8 +36,9 @@ def main():
         print("2. Get Weather Forecast")
         print("3. Get Directions")
         print("4. Get Future Flight Schedules")
-        print("5. Generate Complete Plan")
-        print("6. Exit")
+        print("5. Get Attractions")
+        print("6. Generate Complete Plan")
+        print("7. Exit")
 
         choice = input("Choose an option (1-6): ")
 
@@ -56,7 +59,7 @@ def main():
             params = search_prompt.prompt_weather()
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "weather", params)
             if validity == True:
-                travel_info = weather.get_weather_forecast(params)
+                travel_info = weather.get_forecast(params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "weather", travel_info, params)
                 print(summary)
             else:
@@ -85,8 +88,14 @@ def main():
                 print(message)
                 print(invalid_fields)
         
-
         elif choice == "5":
+            params = search_prompt.prompt_site_visit(llm.llm)
+            travel_info = attraction_api.get_attractions(params, limit=5)
+            summary = tools.generate_travel_info_search_summary(llm.llm, "site", travel_info, params)
+            print(summary)
+
+
+        elif choice == "6":
             validity = False
             #user input string
             user_input = ""
@@ -98,12 +107,12 @@ def main():
                 if(validity == False):
                     print(data)
             print(data)
-            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight, weather)
+            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight, weather, attraction_api)
             output = tools.generate_plan(llm.llm, user_input, data, travel_info)
             print(output)
             
 
-        elif choice == "6":
+        elif choice == "7":
             print("Exiting...")
             break
 

@@ -14,6 +14,9 @@ RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "travel-advisor.p.rapidapi.com")
 LITE_API_KEY = os.getenv("LITEAPI_KEY")
 
 AVIATIONSTACK_API_KEY = os.getenv("AVIATIONSTACK_API_KEY")
+FOURSQURE_API_KEY = os.getenv("FOURSQURE_API_KEY")
+
+
 
 class Travel_info():
 
@@ -142,40 +145,88 @@ class Hotel_RapidAPI(Travel_info):
     
 
 
-# === 2. Weather Forecast (OpenWeatherMap) ===
-class Weather_OpenWeatherMap(Travel_info):
-    def __init__(self, name, base_url=None):
+# === 2. Weather Forecast (OpenWeatherMap 5-day/3-hour forecast) ===
+class Weather_WeatherAPI(Travel_info):
+    def __init__(self, name="WeatherAPI", base_url=None):
         super().__init__(name, base_url)
-        self.info = {}
+        self.base_url = "http://api.weatherapi.com/v1/forecast.json"
 
-    def get_weather_forecast(self, params: dict):
+    def get_forecast(self, params: dict):
         """
-        Get the weather forecast 
+        Fetch future weather forecast using city or coordinates.
 
         Args:
-            params: the parameter for api search
-        
-        Return:
-            Return the json data of fetched info if the api fetch is successful. Otherwise return None
+            params (dict): Must contain:
+                - 'date' (YYYY-MM-DD)
+                - Either 'city' or both 'lat' and 'lon'
+
+        Returns:
+            dict: Forecast data for 12:00 PM on the requested date or error.
         """
-        
-        city_name = params["city"]
-        self.base_url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={OWM_API_KEY}&units=metric"
+        date = params["date"]
+
+        # Determine location query
+        if "city" in params:
+            location = params["city"]
+        elif "lat" in params and "lon" in params:
+            location = f"{params['lat']},{params['lon']}"
+        else:
+            return {"error": "Location must include either 'city' or 'lat' and 'lon'."}
+
+        query_params = {
+            "key": os.getenv("WEATHERAPI_KEY"),
+            "q": location,
+            "dt": date,
+            "hour": 12,
+            "aqi": "no",
+        }
+
         try:
-            response = requests.get(self.base_url)
+            response = requests.get(self.base_url, params=query_params)
+            response.raise_for_status()
             data = response.json()
-            if response.status_code == 200:
+
+            # Extract the 12:00 PM forecast
+            forecast_days = data.get("forecast", {}).get("forecastday", [])
+            if forecast_days:
+                forecast_day = forecast_days[0]
+                forecast_hour = next(
+                    (hour for hour in forecast_day.get("hour", []) if hour.get("time", "").endswith("12:00")),
+                    None
+                )
+            else:
+                forecast_hour = None  # No forecast data available
+
+            if forecast_hour:
                 return {
-                    "description": data["weather"][0]["description"],
-                    "temperature": data["main"]["temp"],
-                    "humidity": data["main"]["humidity"],
-                    "wind_speed": data["wind"]["speed"]
+                    "location": data["location"]["name"],
+                    "date": date,
+                    "description": forecast_hour["condition"]["text"],
+                    "temperature": forecast_hour["temp_c"],
+                    "humidity": forecast_hour["humidity"],
+                    "wind_kph": forecast_hour["wind_kph"],
                 }
             else:
-                return {"error": data.get("message", "City not found.")}
+                return {"error": f"No 12:00 PM forecast available for {date}."}
+
         except requests.exceptions.RequestException as e:
             return {"error": str(e)}
         
+    def get_weather_multidays(self, params: list):
+        """
+        Get weather on multiple days and cities
+
+        Args:
+            params: a list of parameters
+
+        Return:
+            dictionary: ("city", "date"): weather info
+        """
+        weather_dictionary = {}
+        for param in params:
+            weather = self.get_forecast(param)
+            weather_dictionary[(param["city"], param["date"])] = weather
+        return weather_dictionary
 
 
 # === 3. Directions (OpenRouteService) ===
@@ -264,4 +315,46 @@ class FutureFlight_Aviationstack(Travel_info):
             response = self.get_future_flight_schedules(param)
             flights_output[param["airport_dep"]] = response
         return flights_output
+
+#Attractions API
+class Attractions_API(Travel_info):
+    def __init__(self, name, base_url=None):
+        super().__init__(name, base_url)
+        self.info = {}
+        self.base_url =  "https://places-api.foursquare.com/places/search"
+
+    def get_attractions(self, param:dict, limit:int=10):
+
+        headers = {
+            "accept": "application/json",
+            "X-Places-Api-Version": "2025-06-17",
+            "Authorization": "Bearer HVU3GYFLO3LAL2BSQ4YRFUZVTP4IGLMHVLP3D1V5SVYHCW0X"
+        }
+    
+
+        params = {
+            "ll" : param["ll"],
+            "radius" : param["radius"],
+            "limit": limit,
+            "fsq_category_ids": param["category"]
+        }
+
+        try:
+            response = requests.get(self.base_url, params=params, headers=headers)  
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.RequestException as e:
+            print(f"Places search API error: {e}")
+            return None
+        
+    def get_attraction_list(self, params, key):
+        travel_info = {}
+        index = 0
+        for param in params:
+            travel_info[key[index]] = self.get_attractions(param)
+            index += 1
+        return travel_info
+
+    
 

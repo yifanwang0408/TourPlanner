@@ -1,12 +1,14 @@
-from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_OpenWeatherMap, Directions_OpenRouteService, FutureFlight_Aviationstack)
+from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API)
 
 hotel_rapid = Hotel_RapidAPI("Hotel Rapid API")
 hotel_lite = Hotel_LiteAPI("Hotel Lite API","https://api.liteapi.travel")
-weather_owp = Weather_OpenWeatherMap("Weather Forecast (OpenWeatherMap)")
+weather_weatherapi = Weather_WeatherAPI("Weather Forecast")
 direction = Directions_OpenRouteService("Directions (OpenRouteService)")
 furture_flight = FutureFlight_Aviationstack("Future Flight Schedules (Aviationstack)")
+site_visit = Attractions_API("FoursquareAPI")
 
 def test_travel_apis():
+    """
     print("\n--- Testing Hotel Search ---")
     params_hotel = {"city": "Paris", "countryCode": "FR", "minRating": 8, "starRating": 4, "limit": 3, "aiSearch": "Hotels near Effel tower"}
     hotels = hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=params_hotel)
@@ -16,8 +18,8 @@ def test_travel_apis():
         print("No hotel data returned.")
 
     print("\n--- Testing Weather Forecast ---")
-    params_weather = {"city": "Paris"}
-    weather = weather_owp.get_weather_forecast(params_weather)
+    params_weather = {"city": "Paris", "date": "2025-08-01"}
+    weather = weather_weatherapi.get_forecast(params_weather)
     print(weather)
 
     print("\n--- Testing Directions ---")
@@ -41,6 +43,20 @@ def test_travel_apis():
         print(f"First flight info:\n Airline: {first_flight.get('airline', {}).get('name')}\nFlight Number: {first_flight.get('flight', {}).get('iataNumber')}\nDeparture Time: {first_flight.get('departure', {}).get('scheduledTime')}")
     else:
         print("No flight schedule data returned.")
+    """
+
+    print("\n--- Testing attraction Search ---")
+    params = {
+        "ll": "48.8566,2.3522",
+        "radius": 10000
+    }
+    attractions = site_visit.get_attractions(params, limit=10)
+    if(attractions):
+        print(attractions)
+    else:
+        print("No attraction data returned.")
+    
+
 
 if __name__ == "__main__":
     test_travel_apis()

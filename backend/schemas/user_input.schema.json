@@ -31,8 +31,30 @@
             "type": "array",
             "items":
             {  
-                "type": "string",
-                "minimum": 1
+                "type": "object",
+                "minimum": 1,
+                "properties": {
+                    "city":
+                    {
+                        "description": "The name of the city",
+                        "type": "string"
+                    },
+                    "country_code":
+                    {
+                        "description": "The country code of the city",
+                        "type": "string"
+                    },
+                    "city_lat":
+                    {
+                        "description": "The latitude of the city",
+                        "type": "number"
+                    },
+                    "city_lon":
+                    {
+                        "description": "The longitude of the city",
+                        "type": "number"
+                    }
+                }
             }
         },
         "flights":
@@ -102,6 +124,11 @@
                         "description": "The longitude of the city",
                         "type": "number"
                     },
+                    "city_radius":
+                    {
+                        "description": "The radius of the city in meters",
+                        "type": "number"
+                    },
                     "start_date_city":
                     {
                         "type": "string",
@@ -117,6 +144,15 @@
                         "description": "The number of travelers",
                         "type": "integer",
                         "default": 1
+                    },
+                    "places_visit":
+                    {
+                        "description": "The categories of places user are interested to visit",
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "string"
+                        }        
                     },
                     "accomondation":
                     {

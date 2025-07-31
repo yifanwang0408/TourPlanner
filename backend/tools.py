@@ -1,5 +1,5 @@
 from langchain.tools import tool
-from prompt import prompt1, prompt2, prompt3, prompt4
+from prompt import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6
 import json
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 from datetime import date
@@ -168,3 +168,68 @@ def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, sea
 
     
     
+def city_to_latlon(llm: LLM, city_name:str, additional_info:str)->dict:
+    """
+    The functino take city as input and output
+    """
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt5)
+    #user prompt
+    #user_prompt_template = HumanMessagePromptTemplate.from_template("{user_input}")
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+        #user_prompt_template
+    ])
+    
+    chain = (
+        {   "city_name": lambda x: x["city_name"],
+            "additional_info": lambda x: x["additional_info"],
+            #"user_input": lambda x: x["user_input"]
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
+    )
+    response = chain.invoke({"city_name": city_name, "additional_info": additional_info})
+    output = json.loads(response["response"])
+    return output
+
+
+
+def categorize_user_input(llm: LLM, user_input:str)->list:
+    """
+    This function take user input on interest
+
+    Args:
+        llm: llm connection
+        user_input: string on user interest
+
+    Return:
+        a list of interest categories,
+    """
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt6)
+    #user prompt
+    user_prompt_template = HumanMessagePromptTemplate.from_template("{user_input}")
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+        user_prompt_template
+    ])
+    
+    chain = (
+        {  
+            "user_input": lambda x: x["user_input"]
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
+    )
+    response = chain.invoke({"user_input": user_input})
+    output = json.loads(response["response"])
+    return output
+
+
+
+

@@ -9,6 +9,11 @@ prompt1 = (
     "   - output these cities and infom that the input is unclear to the user in the message.\n"
     "   - the user input is invalid in this case\n\n"
     "For each day, assign the city users chosen to visit, you do not need to assign exactly one city per day. Instead, allocate time reasonably based on: travel distance between cities, richness of activities or attractions, interests indicated by the user (e.g., relaxed, cultural, adventurous), and total trip duration.\n\n"
+
+    "For each day, extract user's interests of place to visit, available categories are:\n" 
+    "'Art Gallery','Museum','Aquarium','Attraction','Amusement Park','Movie Theater','Planetarium','Historic Site','Science Museum','Performing Arts Venue','Concert Hall','Music Venue','Theme Park','Water Park','Zoo','Stadium','Sports Arena','Observation Deck','Botanical Garden','Park','Harbor / Marina','Beach'\n"
+    "If user does not specify where they want to visit, based on the city for each day and what are valueble to visit in this city, choose 3-5 categories for places_visit.\n\n "
+
     "Based on user's input on origin, destination, and cities to travel, generate a flights in the flights field in schema. If there are multiple airport in the city, consider them all in the flights field to maximize the probablity to find a flight.\n"
     "If the city does not have an airport, find some nearest ones.\n\n"
     "For city to city during the trip, schedule flights if needed.\n\n"
@@ -42,6 +47,9 @@ prompt2 = (
     "           - description\n" 
     "           - images\n" 
     "           - links\n" 
+    "           - additional choices: hotel name, hotel name"
+    "   - weather: ...\n"
+    "       -note: remember to bring rain coat..."
     "!!IMPORTANT!!: Use emoji and indentation to make the output friendly"
 )
 
@@ -76,4 +84,26 @@ prompt4 = (
     "   -'message'(str) : The user friendly message informing the user which of these fields of their input are invalid and why\n" \
     "   - 'invalid_fields(list) : a list or array of invalid fields. IMPORTANT: the field in the list must match the keys in the user input exactly\n" \
     "IMPORTANT: The output should only be in json format, no extra explanation needed!"
+)
+
+
+prompt5 = (
+    "You are a helpful AI travel planner assistant. Your job now is to transfer city into the latitude, longtitude, and approximate radius of the city.\n"
+    "The city is {city_name}\n"
+    "Additional information about the city: {additional_info}\n"
+    "Output the city in json format:\n"
+    "   -'ll: latitude,longtitude\n"
+    "   - radius: 0 to 100000\n"
+    "   - message: error message if there is error. for example,there are many city have the same name, it is not clear which one you mean."
+    "ll is in string, radius is in int32. Make sure the radius cover most of the city"
+    "!!Respond only with a valid JSON object. No Markdown, no explanations"
+)
+
+prompt6 = (
+    "You are a helpful AI travel planner assistant. Your job now is to take user input and categorize user's interests into following categories:\n"
+    "'Art Gallery','Museum','Aquarium','Attraction','Amusement Park','Movie Theater','Planetarium','Historic Site','Science Museum','Performing Arts Venue','Concert Hall','Music Venue','Theme Park','Water Park','Zoo','Stadium','Sports Arena','Observation Deck','Botanical Garden','Park','Harbor / Marina','Beach'\n"
+    "Output a list of categories that user is interested in. The terms in the list should be exactly same as how it is listed here.\n"
+    "!Respond only with a valid JSON object. No Markdown, no explanations"
+    "Output should follow the format:\n"
+    "   -categories(list of string): values"
 )

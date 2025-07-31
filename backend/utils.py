@@ -3,8 +3,10 @@ weather_input_prompt = {"city": "Enter city: "}
 direction_input_prompt = {"start_lon": "Enter start longitude: ", "start_lat": "Enter start latitude: ", "end_lon": "Enter end longitude: ", "end_lat": "Enter end latitude: "}
 furture_flight_input_prompt = {"airport": "Enter airport IATA code: ", "flight_type": "Enter flight type (arrival/departure): ", "date": "Enter date (YYYY-MM-DD):"}
 
+from tools import categorize_user_input, city_to_latlon
 from travel_api import FutureFlight_Aviationstack, Hotel_LiteAPI
 import os
+from places_category_id import site_categories
 
 
 class Prompt_API_Search():
@@ -34,6 +36,7 @@ class Prompt_API_Search():
         """
         params = {}
         params["city"] = input("Enter city: ")
+        params["date"] = input("Enter date (YYYY-MM-DD): ")
         return params
 
     def prompt_direction(self) -> dict:
@@ -52,17 +55,27 @@ class Prompt_API_Search():
         initial prompt for direction
         """
         params = {}
-        """
-        params["airport"] = input("Enter airport IATA code: ")
-        params["flight_type"] = input("Enter flight type (arrival/departure): ") 
-        params["date"] = input("Enter date (YYYY-MM-DD): ")
-        """
         params["airport_dep"] = input("Enter departure airport IATA code: ")
         params["airport_arr"] = input("Enter arrival airport IATA code: ")
         params["date_dep"] = input("Enter departure date (YYYY-MM-DD): ")
         params["date_arr"] = input("Enter arrival date (YYYY-MM-DD): ")
         return params
+    
+    def prompt_site_visit(self, llm) -> dict:
+        params = {}
+        city = input("Enter the city that you want to visit: ")
+        additional_info = input("Additional info to help us locate the city: ")
+        interest = input("Enter your interest (e.g. attraction): ")
 
+        response  = city_to_latlon(llm, city, additional_info)
+        params["ll"] = response["ll"]
+        params["radius"] = response["radius"]
+
+        interests = categorize_user_input(llm, interest)
+        params["category"] = transfer_interest_id(interests["categories"])
+        return params
+
+        
 
 
 def process_hotel_query_params(parsed_input, limit = 4, aiSearch = None):
@@ -109,32 +122,73 @@ def process_flight_quary_params(parsed_input):
     return list_params
 
 
-def get_weather_params(data, weather):
+def get_weather_params(data):
     days = data["daily_plan"]
     list_params = []
     for day in days:
         param = {}
         param["lat"] = day["city_lat"]
         param["lon"] = day["city_lon"]
+        param["city"] = day["city"]
         param["date"] = day["date"]
         list_params.append(param)
     return list_params
 
-def fetch_all_travel_info(data, hotel, flight, weather):
+def transfer_interest_id(interests):
+    interest_string = ""
+    index = 0
+    for interest in interests:
+        interest_id = site_categories[interest]
+        if index == 0:
+            interest_string += interest_id
+        else:
+            interest_string += "," + interest_id
+        index += 1
+    return interest_string
+
+
+
+def get_site_params(data):
+    site_params = []
+    keys_list = []
+    days = data["daily_plan"]
+    for day in days:
+        param = {}
+        param["ll"] = f"{day['city_lat']},{day['city_lon']}"
+        param["radius"] = day["city_radius"]
+
+        param["category"] = transfer_interest_id(day["places_visit"])
+
+        site_params.append(param)
+        keys_list.append((day["city"], day["date"]))
+    return site_params, keys_list
+
+
+
+
+
+
+def fetch_all_travel_info(data, hotel, flight, weather, attraction):
     travel_info = {}
     
+    #hotel info
     hotel_params, city_list = process_hotel_query_params(data)
     hotel_list = hotel.get_hotel("https://api.liteapi.travel/v3.0/data/hotels", hotel_params, city_list)
     travel_info["hotel"] = hotel_list
 
+    #flight info
     flight_params = process_flight_quary_params(data)
-    print(flight_params)
     flight_list = flight.process_several_flights(flight_params)
-    print(flight_list)
     travel_info["flight"] = flight_list
 
+    #weather info
+    weather_params = get_weather_params(data)
+    weather_list = weather.get_weather_multidays(weather_params)
+    travel_info["weather"] = weather_list
+
+    #attraction info
+    site_params, keys_list = get_site_params(data)
+    site_list = attraction.get_attraction_list(site_params, keys_list)
+    travel_info["site"] = site_list
+
     return travel_info
-
-
-
-
