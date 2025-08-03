@@ -107,3 +107,32 @@ prompt6 = (
     "Output should follow the format:\n"
     "   -categories(list of string): values"
 )
+
+# Prompt dictionaries
+
+hotel_input_prompt = {
+    "city": "Enter city: ",
+    "countryCode": "Enter country code: ",
+    "hotelName": "Enter hotel name: ",
+    "minRating": "Enter the minimum rating of the hotel: ",
+    "starRating": "Enter the star rating (e.g. 3.5, 4.0, 5.0): "
+}
+
+weather_input_prompt = {
+    "city": "Enter city: ",
+    "date": "Enter date (YYYY-MM-DD): "
+}
+
+direction_input_prompt = {
+    "start_lon": "Enter start longitude: ",
+    "start_lat": "Enter start latitude: ",
+    "end_lon": "Enter end longitude: ",
+    "end_lat": "Enter end latitude: "
+}
+
+flight_input_prompt = {
+    "airport_dep": "Enter departure airport IATA code: ",
+    "airport_arr": "Enter arrival airport IATA code: ",
+    "date_dep": "Enter departure date (YYYY-MM-DD): ",
+    "date_arr": "Enter arrival date (YYYY-MM-DD): "
+}
