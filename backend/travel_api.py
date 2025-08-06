@@ -324,7 +324,9 @@ class Attractions_API(Travel_info):
         self.base_url =  "https://places-api.foursquare.com/places/search"
 
     def get_attractions(self, param:dict, limit:int=10):
-
+        """
+        Get the attractions from params
+        """
         headers = {
             "accept": "application/json",
             "X-Places-Api-Version": "2025-06-17",
@@ -349,6 +351,9 @@ class Attractions_API(Travel_info):
             return None
         
     def get_attraction_list(self, params, key):
+        """
+        Get a list of attractions
+        """
         travel_info = {}
         index = 0
         for param in params:
@@ -356,5 +361,50 @@ class Attractions_API(Travel_info):
             index += 1
         return travel_info
 
+# Retaurant API
+class Restaurant_API(Travel_info):
+    def __init__(self, name, base_url=None):
+        super().__init__(name, base_url)
+        self.info = {}
+        self.base_url =  "https://places-api.foursquare.com/places/search"
+
+    def get_restaurant(self, param:dict, limit:int=5):
+        """
+        Get restaurant using param for api call
+        """
+        headers = {
+            "accept": "application/json",
+            "X-Places-Api-Version": "2025-06-17",
+            "Authorization": FOURSQUARE_API_KEY
+        }
     
+
+        params = {
+            "ll" : param["ll"],
+            "radius" : param["radius"],
+            "limit": limit,
+            "fsq_category_ids": param["fsq_category_ids"]
+        }
+        if "query" in param:
+            params["query"] = param["query"]
+            
+        try:
+            response = requests.get(self.base_url, params=params, headers=headers)  
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.RequestException as e:
+            print(f"Places search API error: {e}")
+            return None
+        
+    def get_restaurant_list(self, params, keys):
+        """
+        Get a dictionary of restaurant, where key is (city, date, meal type), and value is info fetched from api
+        """
+        travel_info = {}
+        for key in keys:
+            param = params[key]
+            travel_info[key] = self.get_restaurant(param)
+        return travel_info
+        
 

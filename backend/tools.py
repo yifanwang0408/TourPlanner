@@ -1,5 +1,5 @@
 from langchain.tools import tool
-from prompt import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6
+from prompt import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt_parsing_output
 import json
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 from datetime import date
@@ -89,45 +89,6 @@ def generate_plan(llm: LLM, user_input: str, parsed_input: dict, travel_info: di
     output = response["response"]
     return output
 
-def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, user_input: dict) -> str:
-    """
-    The function validate user input for single api call (for choice 1-4)
-
-    Args:
-        llm: the llm connectino
-        travel_info_category: the category of the travel information
-        user_input: user input
-
-    Return:
-        (validition(bool), message(str), invalid_fields)
-    """
-    #system prompt
-    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt4)
-    #user prompt
-    user_prompt_template = HumanMessagePromptTemplate.from_template("Validate user input")
-
-    prompt = ChatPromptTemplate.from_messages([
-        system_prompt_template, 
-        user_prompt_template
-    ])
-
-    chain = (
-        {   "travel_info_category": lambda x: x["travel_info_category"],
-            "user_input": lambda x: x["user_input"],
-        } 
-        | prompt 
-        | llm
-        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
-    )
-    response = chain.invoke({"travel_info_category": travel_info_category, "user_input": user_input})
-    print(response)
-    output = json.loads(response["response"])
-
-    validity = output["validity"]
-    message = output["message"]
-    invalid_fields = output["invalid_fields"]
-    return validity, message, invalid_fields
-
 
 def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, search_info: dict, user_input: dict) -> str:
     """
@@ -197,7 +158,7 @@ def city_to_latlon(llm: LLM, city_name:str, additional_info:str)->dict:
 
 
 
-def categorize_user_input(llm: LLM, user_input:str)->list:
+def categorize_user_input(llm: LLM, user_input:str, categories_str: str)->list:
     """
     This function take user input on interest
 
@@ -220,16 +181,92 @@ def categorize_user_input(llm: LLM, user_input:str)->list:
     
     chain = (
         {  
+            "interest_categories": lambda x: x["interest_categories"],
             "user_input": lambda x: x["user_input"]
         } 
         | prompt 
         | llm
         | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
     )
-    response = chain.invoke({"user_input": user_input})
+    response = chain.invoke({"interest_categories": categories_str,"user_input": user_input})
     output = json.loads(response["response"])
     return output
 
 
+def generate_plan_json(llm: LLM, output_schema: str, plan: str) -> str:
+    """
+    The function call LLM to parse the plan into json format
+
+    Args:
+        llm: the llm connection
+        output_schema: the path to the output schema
+        plan: the tour plan
+        
+
+    Return:
+        the json format of the generated plan for user
+    """
+
+    with open(output_schema, "r") as f:
+        schema_str = json.load(f)
+
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt_parsing_output)
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+    ])
+    
+    chain = (
+        {   "output_schema": lambda x: x["output_schema"],
+            "plan": lambda x: x["plan"],
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} 
+    )
+    response = chain.invoke({"output_schema": schema_str, "plan": plan})
+    output = response["response"]
+    output = json.loads(output)
+    return output
 
 
+def reprompt_invalid_fields(params: dict, invalid_fields: list) -> dict:
+    for field in invalid_fields:
+        print(f"⚠️ Invalid input for '{field}'. Please re-enter:")
+        new_val = input(f"{field}: ").strip()
+        # Convert numeric inputs when appropriate
+        if new_val.isdigit():
+            new_val = int(new_val)
+        elif new_val.replace(".", "", 1).isdigit():
+            new_val = float(new_val)
+        params[field] = new_val
+    return params
+
+def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, user_input: dict):
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt4)
+    user_prompt_template = HumanMessagePromptTemplate.from_template("Validate user input")
+    prompt = ChatPromptTemplate.from_messages([system_prompt_template, user_prompt_template])
+
+    while True:
+        chain = (
+            {
+                "travel_info_category": lambda x: x["travel_info_category"],
+                "user_input": lambda x: x["user_input"],
+            }
+            | prompt
+            | llm
+            | {"response": lambda x: x.content}
+        )
+        response = chain.invoke({
+            "travel_info_category": travel_info_category,
+            "user_input": user_input
+        })
+        print(response)
+        output = json.loads(response["response"])
+        if output["validity"]:
+            return True, "✅ All fields valid.", []
+        else:
+            print(f"\n🚫 {output['message']}")
+            invalid_fields = output["invalid_fields"]
+            user_input = reprompt_invalid_fields(user_input, invalid_fields)

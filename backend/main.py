@@ -1,4 +1,4 @@
-from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API)
+from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Restaurant_API, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API)
 from llm import LLM
 import tools
 from dotenv import load_dotenv
@@ -13,21 +13,23 @@ def main():
     llm.setup()
     
 
-    #set up api to fetch info
+    # Set up APIs
     hotel_lite = Hotel_LiteAPI("Hotel Lite API","https://api.liteapi.travel")
     hotel_rapid = Hotel_RapidAPI("Hotel Rapid API")
     weather = Weather_WeatherAPI("Weather Forecast (OpenWeatherMap)")
     direction = Directions_OpenRouteService("Directions (OpenRouteService)")
-    furture_flight = FutureFlight_Aviationstack("Future Flight Schedules (Aviationstack)")
+    future_flight = FutureFlight_Aviationstack("Future Flight Schedules (Aviationstack)")
     attraction_api = Attractions_API("Attractions API")
+    restaurant_api = Restaurant_API("Restaurant API")
 
 
-    #set up for the prompt class
+
+    # Prompt setup
     search_prompt = utils.Prompt_API_Search()
     
 
 
-    #user input schema
+    # User input schema path
     input_schema = "backend/schemas/user_input.schema.json"
 
     while True:
@@ -37,17 +39,18 @@ def main():
         print("3. Get Directions")
         print("4. Get Future Flight Schedules")
         print("5. Get Attractions")
-        print("6. Generate Complete Plan")
-        print("7. Exit")
+        print("6. Get Restaurants")
+        print("7. Generate Complete Plan")
+        print("8. Exit")
 
-        choice = input("Choose an option (1-6): ")
+        choice = input("Choose an option (1-8): ")
 
         if choice == "1":
-            params = search_prompt.prompt_hotel()
+            params = search_prompt.prompt_hotel(llm.llm)
             params["limit"] = 3
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "hotel", params)
-            if validity == True:
-                travel_info = hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=params)
+            if validity:
+                travel_info = hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels", params=params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "hotel", travel_info, params)
                 print(summary)
             else:
@@ -56,9 +59,9 @@ def main():
 
 
         elif choice == "2":
-            params = search_prompt.prompt_weather()
+            params = search_prompt.prompt_weather(llm.llm)
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "weather", params)
-            if validity == True:
+            if validity:
                 travel_info = weather.get_forecast(params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "weather", travel_info, params)
                 print(summary)
@@ -67,9 +70,9 @@ def main():
                 print(invalid_fields)
 
         elif choice == "3":
-            params = search_prompt.prompt_direction()
+            params = search_prompt.prompt_direction(llm.llm)
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "direction", params)
-            if validity == True:
+            if validity:
                 travel_info = direction.get_directions(params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "direction", travel_info, params)
                 print(summary)
@@ -78,10 +81,10 @@ def main():
                 print(invalid_fields)
             
         elif choice == "4":
-            params = search_prompt.prompt_furture_flight()
+            params = search_prompt.prompt_furture_flight(llm.llm)
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "flight", params)
-            if validity == True:
-                travel_info = furture_flight.get_future_flight_schedules(params)
+            if validity:
+                travel_info = future_flight.get_future_flight_schedules(params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "flight", travel_info, params)
                 print(summary)
             else:
@@ -94,8 +97,13 @@ def main():
             summary = tools.generate_travel_info_search_summary(llm.llm, "site", travel_info, params)
             print(summary)
 
-
         elif choice == "6":
+            params = search_prompt.prompt_restaurant(llm.llm)
+            travel_info = restaurant_api.get_restaurant(params, limit=5)
+            summary = tools.generate_travel_info_search_summary(llm.llm, "restaurant", travel_info, params)
+            print(summary)
+
+        elif choice == "7":
             validity = False
             #user input string
             user_input = ""
@@ -106,13 +114,14 @@ def main():
                 validity, data = tools.validate_user_input(llm.llm, input_schema, user_input)
                 if(validity == False):
                     print(data)
-            print(data)
-            travel_info = utils.fetch_all_travel_info(data, hotel_lite, furture_flight, weather, attraction_api)
+            travel_info = utils.fetch_all_travel_info(data, hotel_lite, future_flight, weather, attraction_api, restaurant_api)
             output = tools.generate_plan(llm.llm, user_input, data, travel_info)
-            print(output)
+            output_json = tools.generate_plan_json(llm.llm, "backend/schemas/output.schema.json", output)
+            print(output_json)
+            utils.output_travel_info(output_json["daily_plan"])
             
 
-        elif choice == "7":
+        elif choice == "8":
             print("Exiting...")
             break
 

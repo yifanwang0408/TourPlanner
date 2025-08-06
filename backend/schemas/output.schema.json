@@ -1,0 +1,55 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#",
+  "title": "Tour Planner Output Schema",
+  "type": "object",
+  "properties": 
+  {
+
+    "daily_plan":
+    {
+        "description": "details for each day of the trip",
+        "type": "array",
+        "items":
+        {
+            "day_title":
+            {
+                "description": "The title of the day, in similar format of Day 1 (date) - city",
+                "type": "string"
+            },
+            "activities":
+            {
+                "description": "The activities of the day",
+                "type": "array",
+                "items":
+                {
+                    "type": "object",
+                    "properties":
+                    {
+                        "activity_description":
+                        {
+                            "description": "The description of the activity",
+                            "type": "string"
+                        },
+                        "images":
+                        {
+                            "description": "link to the images of the activity",
+                            "type": "array",
+                            "items":
+                            {
+                                "type": "url"
+                            }                         
+                        }
+                    }
+                }
+            },
+            "extra_tip":
+            {
+                "description": "The extra tip of the day",
+                "type": "string"
+            }
+        },
+        "required": ["day_title", "activities"]
+    }
+  },
+  "required": ["daily_plan"]
+}

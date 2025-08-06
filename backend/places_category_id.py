@@ -48,3 +48,8 @@ restaurant_categories = {
     'Food Truck': '4bf58dd8d48988d1cb941735',
     'Buffet': '52e81612bcbc57f1066b79f1'
 }
+
+
+site_categories_str = "'Art Gallery','Museum','Aquarium','Attraction', 'Amusement Park','Movie Theater','Planetarium','Historic Site','Science Museum','Performing Arts Venue','Concert Hall','Music Venue','Theme Park','Water Park','Zoo','Stadium','Sports Arena','Observation Deck','Botanical Garden','Park','Harbor / Marina','Beach'"
+
+restaurant_categories_str = "'Restaurant','Cafe / Coffee Shop','Bar','Fast Food Restaurant','Burger Joint','Pizza Place','Sushi Restaurant','Italian Restaurant','Mexican Restaurant','Thai Restaurant','Vietnamese Restaurant','Korean BBQ Restaurant','Seafood Restaurant','Vegetarian / Vegan Restaurant','Steakhouse','Breakfast Spot','Ice Cream Shop','Bakery','Wine Bar','Cocktail Bar','Tea Room','Food Truck','Buffet'"

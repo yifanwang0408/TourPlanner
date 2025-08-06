@@ -1,4 +1,4 @@
-from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API)
+from travel_api import (Hotel_LiteAPI, Hotel_RapidAPI, Weather_WeatherAPI, Directions_OpenRouteService, FutureFlight_Aviationstack, Attractions_API, Restaurant_API)
 
 hotel_rapid = Hotel_RapidAPI("Hotel Rapid API")
 hotel_lite = Hotel_LiteAPI("Hotel Lite API","https://api.liteapi.travel")
@@ -6,9 +6,11 @@ weather_weatherapi = Weather_WeatherAPI("Weather Forecast")
 direction = Directions_OpenRouteService("Directions (OpenRouteService)")
 furture_flight = FutureFlight_Aviationstack("Future Flight Schedules (Aviationstack)")
 site_visit = Attractions_API("FoursquareAPI")
+restaurant = Restaurant_API("Restaurant api")
+
 
 def test_travel_apis():
-    """
+
     print("\n--- Testing Hotel Search ---")
     params_hotel = {"city": "Paris", "countryCode": "FR", "minRating": 8, "starRating": 4, "limit": 3, "aiSearch": "Hotels near Effel tower"}
     hotels = hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=params_hotel)
@@ -43,19 +45,33 @@ def test_travel_apis():
         print(f"First flight info:\n Airline: {first_flight.get('airline', {}).get('name')}\nFlight Number: {first_flight.get('flight', {}).get('iataNumber')}\nDeparture Time: {first_flight.get('departure', {}).get('scheduledTime')}")
     else:
         print("No flight schedule data returned.")
-    """
+
 
     print("\n--- Testing attraction Search ---")
     params = {
         "ll": "48.8566,2.3522",
-        "radius": 10000
+        "radius": 10000,
+        "category": "4bf58dd8d48988d1e2931735"
     }
     attractions = site_visit.get_attractions(params, limit=10)
     if(attractions):
         print(attractions)
     else:
         print("No attraction data returned.")
-    
+
+    print("\n--- Testing restaurant Search ---")
+    params = {
+        "ll": "48.8566,2.3522",
+        "radius": 10000,
+        "fsq_category_ids": "4d4b7105d754a06374d81259",
+        "quary": "Franch food"
+    }
+    restaurants = restaurant.get_restaurant(params, limit=5)
+    if(restaurants):
+        print(restaurants)
+    else:
+        print("No restaurant data returned.")
+
 
 
 if __name__ == "__main__":

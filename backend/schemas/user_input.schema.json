@@ -196,6 +196,45 @@
                                 "default": ""
                             }
                         }
+                    },
+                    "food":
+                    {
+                        "description": "user preference on food",
+                        "type": "array",
+                        "items":
+                        {
+                            "type": "object",
+                            "properties":
+                            { 
+                                "type_meal":
+                                {
+                                    "description": "The type of meal",
+                                    "type": "string",
+                                    "enum": ["breakfast", "lunch", "dinner", "other"]
+                                },
+                                "type_food":
+                                {
+                                    "description": "The types of food want to have for the meal",
+                                    "type": "array",
+                                    "items":
+                                    {
+                                        "type": "string"
+                                    }
+                                },
+                                "extra_requirement":
+                                {
+                                    "description": "extra requirement on the food",
+                                    "type": "string",
+                                    "default":""
+                                }
+                            }
+                        }
+                    },
+                    "other_requirement":
+                    {
+                            "description": "Other user requirement that does not belong the the other categories. For example, user want to have a relatively loose schedule or want to spend most of the time on visit national parks.",
+                            "type": "string",
+                            "default": ""
                     } 
                 }
             }
