@@ -68,9 +68,6 @@ class Prompt_API_Search():
         pass
 
     def prompt_hotel(self, llm) -> dict:
-        """
-        initial prompt for hotel
-        """
         user_input = {
             "city": input(hotel_input_prompt["city"]),
             "countryCode": input(hotel_input_prompt["countryCode"]),
@@ -93,7 +90,6 @@ class Prompt_API_Search():
             validated_input["aiSearch"] = input("Enter your preference: ")
 
         return validated_input
-    
 
     def prompt_weather(self, llm) -> dict:
         user_input = {
@@ -125,7 +121,7 @@ class Prompt_API_Search():
         return reprompt_until_valid(
             llm, "flight", user_input, furture_flight_input_prompt, validate_user_input_single_api_call
         )
-    
+
     def prompt_site_visit(self, llm) -> dict:
         """
         initial prompt for places to visit
@@ -135,7 +131,7 @@ class Prompt_API_Search():
         additional_info = input("Additional info to help us locate the city: ")
         interest = input("Enter your interest (e.g. attraction): ")
 
-        response  = city_to_latlon(llm, city, additional_info)
+        response = city_to_latlon(llm, city, additional_info)
         params["ll"] = response["ll"]
         params["radius"] = response["radius"]
 
@@ -159,6 +155,7 @@ class Prompt_API_Search():
         params["fsq_category_ids"] = transfer_interest_id(interests["categories"], restaurant_categories)
 
         return params
+
         
 
 
@@ -177,17 +174,17 @@ def process_hotel_query_params(parsed_input, limit = 4, aiSearch = None):
     #for each city traveled to, generate query to fetch hotel
     days = parsed_input["daily_plan"]
     list_params = []
-    city_list = [] 
-
+    city_list = []
     for day in days:
-        param = {}
-        param["countryCode"] = day["country_code"]
-        param["cityName"] = day["city"]
-        if day["accomondation"]["hotel_name"] != "":
+        param = {
+            "countryCode": day["country_code"],
+            "cityName": day["city"],
+            "starRatingparam": day["accomondation"]["hotel_rating"],
+            "limit": limit
+        }
+        if day["accomondation"]["hotel_name"]:
             param["hotelName"] = day["accomondation"]["hotel_name"]
-        param["starRatingparam"] = day["accomondation"]["hotel_rating"]
-        param["limit"] = limit
-        if aiSearch != None:
+        if aiSearch:
             param["aiSearch"] = aiSearch
         list_params.append(param)
         city_list.append(day["city"])
@@ -206,12 +203,12 @@ def process_flight_quary_params(parsed_input):
     """
     list_params = []
     for flight in parsed_input["flights"]:
-        param = {}
-        param["airport_dep"] = flight["departure_iata"]
-        param["airport_arr"] = flight["arrival_iata"]
-        param["date_dep"] = flight["departure_date"]
-        param["date_arr"] = flight["arrival_date"]
-        list_params.append(param)
+        list_params.append({
+            "airport_dep": flight["departure_iata"],
+            "airport_arr": flight["arrival_iata"],
+            "date_dep": flight["departure_date"],
+            "date_arr": flight["arrival_date"]
+        })
     return list_params
 
 
@@ -227,13 +224,13 @@ def get_weather_params(data):
     """
     days = data["daily_plan"]
     list_params = []
-    for day in days:
-        param = {}
-        param["lat"] = day["city_lat"]
-        param["lon"] = day["city_lon"]
-        param["city"] = day["city"]
-        param["date"] = day["date"]
-        list_params.append(param)
+    for day in data["daily_plan"]:
+        list_params.append({
+            "lat": day["city_lat"],
+            "lon": day["city_lon"],
+            "city": day["city"],
+            "date": day["date"]
+        })
     return list_params
 
 def transfer_interest_id(interests:list, interest_dict:dict):
@@ -355,23 +352,16 @@ def fetch_all_travel_info(data, hotel, flight, weather, attraction, restaurant):
         a dictionary including all travel information, where the key is category of info, and the value is the info fetched from api..
     """
     travel_info = {}
-    
-    #hotel info
+
     hotel_params, city_list = process_hotel_query_params(data)
-    hotel_list = hotel.get_hotel("https://api.liteapi.travel/v3.0/data/hotels", hotel_params, city_list)
-    travel_info["hotel"] = hotel_list
+    travel_info["hotel"] = hotel.get_hotel("https://api.liteapi.travel/v3.0/data/hotels", hotel_params, city_list)
 
-    #flight info
     flight_params = process_flight_quary_params(data)
-    flight_list = flight.process_several_flights(flight_params)
-    travel_info["flight"] = flight_list
+    travel_info["flight"] = flight.process_several_flights(flight_params)
 
-    #weather info
     weather_params = get_weather_params(data)
-    weather_list = weather.get_weather_multidays(weather_params)
-    travel_info["weather"] = weather_list
+    travel_info["weather"] = weather.get_weather_multidays(weather_params)
 
-    #attraction info
     site_params, keys_list = get_site_params(data)
     site_list = attraction.get_attraction_list(site_params, keys_list)
     travel_info["site"] = site_list
