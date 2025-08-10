@@ -67,6 +67,7 @@ prompt4 = (
     "There is the user input: {user_input}\n"
     "1. If the target validation is on 'weather', you have to make sure: \n"
     "   - the city is a real city\n"
+    "   - the date is a real date\n"
     "2. If the target validation is on 'direction', you have to make sure: \n"
     "   - the start_longtitude, start_latitude, end_longtitude, end_latitude are valid, meaning they are within the range on earth\n"
     "3. If the target validation is on 'flight', you have to make sure: \n"
@@ -82,7 +83,7 @@ prompt4 = (
     "   -'validity'(bool): True or False in boolean"
     "   -'message'(str) : The user friendly message informing the user which of these fields of their input are invalid and why\n" \
     "   - 'invalid_fields(list) : a list or array of invalid fields. IMPORTANT: the field in the list must match the keys in the user input exactly\n" \
-    "IMPORTANT: The output should only be in json format, no extra explanation needed!"
+    "!!Respond only with a valid JSON object. No Markdown, no explanations. If anything cannot be parsed, still follow the format mentioned above and consider the input invalid."
 )
 
 

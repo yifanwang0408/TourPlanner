@@ -17,7 +17,7 @@ direction_input_prompt = {
     "end_lon": "Enter end longitude: ", 
     "end_lat": "Enter end latitude: "
 }
-furture_flight_input_prompt = {
+future_flight_input_prompt = {
     "airport_dep": "Enter departure airport IATA code:", 
     "airport_arr": "Enter arrival airport IATA code: ", 
     "date_dep": "Enter departure date (YYYY-MM-DD): ", 
@@ -32,7 +32,8 @@ site_visit_prompt = {
 
 restaurant_prompt = {
     "city": "Enter the city that you want to visit: ", 
-    "additional_info": "Additional info to help us locate the city: ", "food_preference":"Enter your interest on food (e.g. restaurant): "
+    "additional_info": "Additional info to help us locate the city: ", 
+    "food_preference":"Enter your interest on food (e.g. restaurant): "
 }
 
 
@@ -113,13 +114,13 @@ class Prompt_API_Search():
 
     def prompt_furture_flight(self, llm) -> dict:
         user_input = {
-            "airport_dep": input(furture_flight_input_prompt["airport_dep"]),
-            "airport_arr": input(furture_flight_input_prompt["airport_arr"]),
-            "date_dep": input(furture_flight_input_prompt["date_dep"]),
-            "date_arr": input(furture_flight_input_prompt["date_arr"])
+            "airport_dep": input(future_flight_input_prompt["airport_dep"]),
+            "airport_arr": input(future_flight_input_prompt["airport_arr"]),
+            "date_dep": input(future_flight_input_prompt["date_dep"]),
+            "date_arr": input(future_flight_input_prompt["date_arr"])
         }
         return reprompt_until_valid(
-            llm, "flight", user_input, furture_flight_input_prompt, validate_user_input_single_api_call
+            llm, "flight", user_input, future_flight_input_prompt, validate_user_input_single_api_call
         )
 
     def prompt_site_visit(self, llm) -> dict:

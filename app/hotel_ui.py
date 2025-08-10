@@ -1,0 +1,99 @@
+import streamlit as st
+
+import backend.tools as tools
+from backend.travel_api import Hotel_LiteAPI
+from backend.utils import hotel_input_prompt
+
+
+class HotelInfo:
+    def __init__(self, llm):
+        #set up api to fetch info
+        if "hotel_lite" not in st.session_state:
+            st.session_state.hotel_lite = Hotel_LiteAPI("Hotel Lite API","https://api.liteapi.travel")
+        #hotel variable setup
+        if "hotel_params" not in st.session_state:
+            st.session_state.hotel_params={}
+        if "hotel_substep" not in st.session_state:
+            st.session_state.hotel_substep = 0
+        if "hotel_invalid_fields" not in st.session_state:
+            st.session_state.hotel_invalid_fields = []
+        self.substep = st.session_state.hotel_substep
+        self.hotel_lite = st.session_state.hotel_lite
+        self.keys = ["city", "countryCode", "minRating", "starRating"]
+        self.llm = llm
+        self.keys_length = len(self.keys)
+    
+    @staticmethod
+    def next_back_button(answer, key): 
+        cols = st.columns(4)  # create 2 columns
+
+        with cols[0]:
+            if st.button("Back") and st.session_state.hotel_substep > 0:
+                st.session_state.hotel_substep -= 1
+                st.rerun()
+
+        with cols[3]:
+            if st.button("Next") and answer.strip():
+                st.session_state.hotel_params[key] = answer
+                st.session_state.hotel_substep += 1
+                st.rerun()
+                
+    def reset(self):
+        st.session_state.hotel_substep = 0
+        st.session_state.hotel_params = {}
+        st.session_state.hotel_invalid_fields = []
+        st.rerun()
+                
+    def initial_prompt(self):
+        key = self.keys[self.substep]
+        st.write(f"Q{self.substep + 1}: {hotel_input_prompt[key]}")
+        answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
+
+        self.next_back_button(answer, key)
+
+    def output_page(self):
+        # All questions answered
+        st.success("All questions answered!")
+        st.session_state.hotel_params["limit"] = 5
+        validity, message, st.session_state.hotel_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "hotel", st.session_state.hotel_params)
+        if validity == True:
+            travel_info = self.hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=st.session_state.hotel_params)
+            summary = tools.generate_travel_info_search_summary(self.llm.llm, "hotel", travel_info, st.session_state.hotel_params)
+            st.write(summary)
+            if st.button("Restart"):
+                self.reset()
+        else:
+            st.write(message)
+            st.write("Do you want to re-enter these field?")
+            cols = st.columns(4)  # create 2 columns
+            with cols[0]:
+                if st.button("No"):
+                    if st.button("Restart"):
+                        self.reset()
+            with cols[3]:
+                if st.button("Yes"):
+                    st.session_state.hotel_substep += 1
+                    st.rerun()
+        
+    def reprompt(self):
+        if self.substep < self.keys_length + len(st.session_state.hotel_invalid_fields) + 1:
+            key = st.session_state.hotel_invalid_fields[self.substep-( self.keys_length+1)]
+            st.write(f"Q{self.substep + 1}: {hotel_input_prompt[key]}")
+            answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
+
+            self.next_back_button(answer, key)
+            
+        else:
+            st.session_state.hotel_substep =  self.keys_length
+            st.rerun()
+
+    def run(self):
+        st.title("Get Hotel")
+        st.text("Follow the steps to fetch hotel information")
+        self.substep = st.session_state.hotel_substep
+        if self.substep <  self.keys_length:
+            self.initial_prompt()
+        elif self.substep ==  self.keys_length:
+            self.output_page()
+        else:
+            self.reprompt()

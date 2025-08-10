@@ -1,5 +1,5 @@
 from langchain.tools import tool
-from prompt import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt_parsing_output
+from prompts import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt_parsing_output
 import json
 from datetime import date
 
@@ -7,7 +7,6 @@ from langchain.prompts import (ChatPromptTemplate, HumanMessagePromptTemplate,
                                SystemMessagePromptTemplate)
 from langchain.tools import tool
 from llm import LLM
-from prompt import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6
 
 
 def validate_user_input(llm, input_schema, user_input):
@@ -247,3 +246,43 @@ def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, use
             print(f"\n🚫 {output['message']}")
             invalid_fields = output["invalid_fields"]
             user_input = reprompt_invalid_fields(user_input, invalid_fields)
+
+
+def validate_user_input_single_api_call_app(llm: LLM, travel_info_category: str, user_input: dict) -> str:
+    """
+    The function validate user input for single api call (for choice 1-4)
+
+    Args:
+        llm: the llm connectino
+        travel_info_category: the category of the travel information
+        user_input: user input
+
+    Return:
+        (validition(bool), message(str), invalid_fields)
+    """
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt4)
+    #user prompt
+    user_prompt_template = HumanMessagePromptTemplate.from_template("Validate user input")
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+        user_prompt_template
+    ])
+
+    chain = (
+        {   "travel_info_category": lambda x: x["travel_info_category"],
+            "user_input": lambda x: x["user_input"],
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
+    )
+    response = chain.invoke({"travel_info_category": travel_info_category, "user_input": user_input})
+    print(response)
+    output = json.loads(response["response"])
+
+    validity = output["validity"]
+    message = output["message"]
+    invalid_fields = output["invalid_fields"]
+    return validity, message, invalid_fields
