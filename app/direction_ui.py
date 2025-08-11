@@ -43,7 +43,13 @@ class DirectionInfo:
         st.session_state.direction_params = {}
         st.session_state.direction_invalid_fields = []
         st.rerun()
-        
+    
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{direction_input_prompt[key]} {st.session_state.direction_params[key]}")
+        st.markdown("\n---\n")
+            
     def initial_prompt(self):
         key = self.keys[self.substep]
         st.write(f"Q{self.substep + 1}: {direction_input_prompt[key]}")
@@ -54,6 +60,7 @@ class DirectionInfo:
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         validity, message, st.session_state.direction_invalid_fields =  tools.validate_user_input_single_api_call_app(self.llm.llm, "direction", st.session_state.direction_params)
         if validity == True:
             travel_info = self.direction.get_directions(st.session_state.direction_params)

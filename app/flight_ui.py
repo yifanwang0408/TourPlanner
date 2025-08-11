@@ -44,6 +44,12 @@ class FlightInfo:
         st.session_state.flight_params = {}
         st.session_state.flight_invalid_fields = []
         st.rerun()
+        
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{future_flight_input_prompt[key]} {st.session_state.flight_params[key]}")
+        st.markdown("\n---\n")
                 
     def initial_prompt(self):
         key = self.keys[self.substep]
@@ -55,6 +61,7 @@ class FlightInfo:
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         validity, message, st.session_state.flight_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "flight", st.session_state.flight_params)
         if validity == True:
             travel_info = self.future_flight.get_future_flight_schedules(st.session_state.flight_params)

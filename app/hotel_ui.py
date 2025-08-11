@@ -43,6 +43,12 @@ class HotelInfo:
         st.session_state.hotel_params = {}
         st.session_state.hotel_invalid_fields = []
         st.rerun()
+        
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{hotel_input_prompt[key]} {st.session_state.hotel_params[key]}")
+        st.markdown("\n---\n")
                 
     def initial_prompt(self):
         key = self.keys[self.substep]
@@ -54,6 +60,7 @@ class HotelInfo:
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         st.session_state.hotel_params["limit"] = 5
         validity, message, st.session_state.hotel_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "hotel", st.session_state.hotel_params)
         if validity == True:

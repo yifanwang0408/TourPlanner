@@ -23,7 +23,7 @@ class WeatherInfo:
         self.weather = st.session_state.weather
         self.keys = ["city", "date"]
         self.llm = llm
-        self.keys_length = 2
+        self.keys_length = len(self.keys)
     
     @staticmethod
     def next_back_button(answer, key): 
@@ -40,6 +40,7 @@ class WeatherInfo:
                 st.session_state.weather_substep += 1
                 st.rerun()
                 
+                
     def reset(self):
         st.session_state.weather_substep = 0
         st.session_state.weather_params = {}
@@ -49,20 +50,30 @@ class WeatherInfo:
     def initial_prompt(self):
         key = self.keys[self.substep]
         st.write(f"Q{self.substep + 1}: {weather_input_prompt[key]}")
-        answer = st.text_input("Please Enter:", key=f"weather_{self.substep}")
-    
+        answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
+
         self.next_back_button(answer, key)
+        
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{weather_input_prompt[key]} {st.session_state.weather_params[key]}")
+        st.markdown("\n---\n")
         
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         validity, message, st.session_state.weather_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "weather", st.session_state.weather_params)
         if validity == True:
             travel_info = self.weather.get_forecast(st.session_state.weather_params)
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
             st.write(summary)
             if st.button("Restart"):
-                self.reset()
+                st.session_state.weather_substep = 0
+                st.session_state.weather_params = {}
+                st.session_state.weather_invalid_fields = []
+                st.rerun()
         else:
             st.write(message)
             st.write("Do you want to re-enter these field?")
@@ -70,30 +81,34 @@ class WeatherInfo:
             with cols[0]:
                 if st.button("No"):
                     if st.button("Restart"):
-                        self.reset()
+                        st.session_state.weather_substep = 0
+                        st.session_state.weather_params = {}
+                        st.session_state.weather_invalid_fields = []
+                        st.rerun()
             with cols[3]:
                 if st.button("Yes"):
                     st.session_state.weather_substep += 1
                     st.rerun()
-        
+                    
     def reprompt(self):
         if self.substep < self.keys_length + len(st.session_state.weather_invalid_fields) + 1:
-            key = st.session_state.weather_invalid_fields[self.substep-(self.keys_length+1)]
+            key = st.session_state.weather_invalid_fields[self.substep-( self.keys_length+1)]
             st.write(f"Q{self.substep + 1}: {weather_input_prompt[key]}")
             answer = st.text_input("Please Enter:", key=f"weather_{self.substep}")
 
             self.next_back_button(answer, key)
+            
         else:
-            st.session_state.weather_substep = self.keys_length
+            st.session_state.weather_substep =  self.keys_length
             st.rerun()
 
     def run(self):
         st.title("Get Weather")
         st.text("Follow the stseps to fetch weather information")
         self.substep = st.session_state.weather_substep
-        if self.substep < self.keys_length:
+        if self.substep <  self.keys_length:
             self.initial_prompt()
-        elif self.substep == self.keys_length:
+        elif self.substep ==  self.keys_length:
             self.output_page()
         else:
             self.reprompt()

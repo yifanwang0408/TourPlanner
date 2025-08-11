@@ -59,7 +59,9 @@ def main():
 
         elif choice == "2":
             params = search_prompt.prompt_weather(llm.llm)
+            validity = True
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "weather", params)
+            #validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "weather", params)
             if validity:
                 travel_info = weather.get_forecast(params)
                 summary = tools.generate_travel_info_search_summary(llm.llm, "weather", travel_info, params)

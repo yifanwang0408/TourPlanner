@@ -37,6 +37,7 @@ class AttractionInfo:
                 if key == "interest":
                     interests = tools.categorize_user_input(self.llm.llm, answer, site_categories_str)
                     st.session_state.attraction_params["category"] = transfer_interest_id(interests["categories"],site_categories)
+                    st.session_state.attraction_params[key] = answer
                 else:
                     st.session_state.attraction_params[key] = answer
                 st.session_state.attraction_substep += 1
@@ -46,6 +47,12 @@ class AttractionInfo:
         st.session_state.attraction_substep = 0
         st.session_state.attraction_params = {}
         st.rerun()
+    
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{site_visit_prompt[key]} {st.session_state.attraction_params[key]}")
+        
                 
     def initial_prompt(self):
         key = self.keys[self.substep]
@@ -57,6 +64,7 @@ class AttractionInfo:
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         response  = tools.city_to_latlon(self.llm.llm, st.session_state.attraction_params["city"], st.session_state.attraction_params["additional_info"])
         st.session_state.attraction_params["ll"] = response["ll"]
         st.session_state.attraction_params["radius"] = response["radius"]

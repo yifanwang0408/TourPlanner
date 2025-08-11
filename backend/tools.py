@@ -221,12 +221,13 @@ def reprompt_invalid_fields(params: dict, invalid_fields: list) -> dict:
 
 def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, user_input: dict):
     system_prompt_template = SystemMessagePromptTemplate.from_template(prompt4)
-    user_prompt_template = HumanMessagePromptTemplate.from_template("Validate user input")
-    prompt = ChatPromptTemplate.from_messages([system_prompt_template, user_prompt_template])
-
+   
+    prompt = ChatPromptTemplate.from_messages([system_prompt_template])
+    today_str = date.today().isoformat()
     while True:
         chain = (
             {
+                "today_date": lambda x: x["today_date"],
                 "travel_info_category": lambda x: x["travel_info_category"],
                 "user_input": lambda x: x["user_input"],
             }
@@ -235,6 +236,7 @@ def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, use
             | {"response": lambda x: x.content}
         )
         response = chain.invoke({
+            "today_date": today_str,
             "travel_info_category": travel_info_category,
             "user_input": user_input
         })
@@ -262,27 +264,27 @@ def validate_user_input_single_api_call_app(llm: LLM, travel_info_category: str,
     """
     #system prompt
     system_prompt_template = SystemMessagePromptTemplate.from_template(prompt4)
-    #user prompt
-    user_prompt_template = HumanMessagePromptTemplate.from_template("Validate user input")
-
+    today_str = date.today().isoformat()
     prompt = ChatPromptTemplate.from_messages([
         system_prompt_template, 
-        user_prompt_template
     ])
 
     chain = (
-        {   "travel_info_category": lambda x: x["travel_info_category"],
+        {   
+            "today_date": lambda x: x["today_date"],
+            "travel_info_category": lambda x: x["travel_info_category"],
             "user_input": lambda x: x["user_input"],
         } 
         | prompt 
         | llm
         | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
     )
-    response = chain.invoke({"travel_info_category": travel_info_category, "user_input": user_input})
+    response = chain.invoke({"today_date": today_str, "travel_info_category": travel_info_category, "user_input": user_input})
     print(response)
     output = json.loads(response["response"])
 
-    validity = output["validity"]
-    message = output["message"]
-    invalid_fields = output["invalid_fields"]
-    return validity, message, invalid_fields
+    if output["validity"]:
+        return True, "✅ All fields valid.", []
+    else:
+        return False, f"🚫 {output['message']}", output["invalid_fields"]
+    

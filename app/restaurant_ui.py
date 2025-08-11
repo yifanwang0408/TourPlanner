@@ -35,6 +35,7 @@ class RestaurantInfo:
                 if key == "food_preference":
                     interests = tools.categorize_user_input(self.llm.llm, answer, restaurant_categories_str)
                     st.session_state.restaurant_params["fsq_category_ids"] = transfer_interest_id(interests["categories"], restaurant_categories)
+                    st.session_state.restaurant_params[key] = answer
                 else:
                     st.session_state.restaurant_params[key] = answer
                 st.session_state.restaurant_substep += 1
@@ -44,6 +45,12 @@ class RestaurantInfo:
         st.session_state.restaurant_substep = 0
         st.session_state.restaurant_params = {}
         st.rerun()
+        
+    def present_input(self):
+        st.write("Your Input:")
+        for key in self.keys:
+            st.write(f"{restaurant_prompt[key]} {st.session_state.restaurant_params[key]}")
+        st.markdown("\n---\n")
                 
     def initial_prompt(self):
         key = self.keys[self.substep]
@@ -55,6 +62,7 @@ class RestaurantInfo:
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
+        self.present_input()
         response  = tools.city_to_latlon(self.llm.llm, st.session_state.restaurant_params["city"], st.session_state.restaurant_params["additional_info"])
         st.session_state.restaurant_params["ll"] = response["ll"]
         st.session_state.restaurant_params["radius"] = response["radius"]
