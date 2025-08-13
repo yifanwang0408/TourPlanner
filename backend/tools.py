@@ -8,7 +8,12 @@ from langchain.prompts import (ChatPromptTemplate, HumanMessagePromptTemplate,
 from langchain.tools import tool
 from llm import LLM
 
-
+prompt_validation ={
+    "weather": "1. The city must be a real city.\n2. The date must be a valid calendar date.",
+    "direction": "1. The start_longitude, start_latitude, end_longitude, and end_latitude must be within valid Earth coordinate ranges",
+    "hotel": "1. The city must be a real city.\n2. The countryCode must exist and match the city.\n3. The min_rating must be between 0 and 10 inclusive (accept numbers like 6, 6.0).  Important!!!Integers, float, and strings representing numbers are accepted.\n4. The starRating must be between 1 and 5 inclusive, with allowed decimals '.0' or '.5' (e.g., 3.5, 4.0, 5.0, 4, 5). Important!!!Integers, float, and strings representing numbers are accepted.\n",
+    "flight": "1. The airport IATA code ('airport_dep' and 'airport_arr' field) must exist.\n2. The date ('date_dep' and 'date_arr') must be a valid calendar date."
+}
 def validate_user_input(llm, input_schema, user_input):
     with open(input_schema, "r") as f:
         schema_str = json.load(f)
@@ -118,6 +123,7 @@ def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, sea
         "info_json": search_info,
         "user_input": user_input
     })
+    print(response["response"])
     return response["response"]
 
 def city_to_latlon(llm: LLM, city_name: str, additional_info: str) -> dict:
@@ -228,7 +234,7 @@ def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, use
         chain = (
             {
                 "today_date": lambda x: x["today_date"],
-                "travel_info_category": lambda x: x["travel_info_category"],
+                "validation_rule": lambda x: x["validation_rule"],
                 "user_input": lambda x: x["user_input"],
             }
             | prompt
@@ -237,7 +243,7 @@ def validate_user_input_single_api_call(llm: LLM, travel_info_category: str, use
         )
         response = chain.invoke({
             "today_date": today_str,
-            "travel_info_category": travel_info_category,
+            "validation_rule": prompt_validation[travel_info_category],
             "user_input": user_input
         })
         print(response)
@@ -272,14 +278,14 @@ def validate_user_input_single_api_call_app(llm: LLM, travel_info_category: str,
     chain = (
         {   
             "today_date": lambda x: x["today_date"],
-            "travel_info_category": lambda x: x["travel_info_category"],
+            "validation_rule": lambda x: x["validation_rule"],
             "user_input": lambda x: x["user_input"],
         } 
         | prompt 
         | llm
-        | {"response": lambda x: x.content} #because prompt1 ask it to direcly only output in json
+        | {"response": lambda x: x.content}
     )
-    response = chain.invoke({"today_date": today_str, "travel_info_category": travel_info_category, "user_input": user_input})
+    response = chain.invoke({"today_date": today_str, "validation_rule": prompt_validation[travel_info_category], "user_input": user_input})
     print(response)
     output = json.loads(response["response"])
 

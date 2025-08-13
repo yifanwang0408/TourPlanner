@@ -2,7 +2,7 @@ hotel_input_prompt = {
     "city": "Enter city: ", 
     "countryCode": "Enter countryCode of where the city is located in: ", 
     "hotelName": "Enter hotel name: ", 
-    "minRating": "Enter the minimum rating of the hotel: ", 
+    "minRating": "Enter the minimum rating of the hotel (0-10): ", 
     "starRating": "Enter the star rating of the hotel(star ratings have 2 allowed decimals '.0' and '.5' from 1 to 5. e.g. '3.5,4.0,5.0'): "
 }
 

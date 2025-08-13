@@ -87,6 +87,20 @@
                         "description": "The arrival date of ther flight",
                         "type": "string",
                         "format": "date"
+                    },
+                    "budegt":
+                    {
+                        "description": "Budget for the flight, either as a numeric amount or a descriptive word",
+                        "anyOf": [
+                            { 
+                                "type": "number" 
+                            },
+                            { 
+                                "type": "string", 
+                                "enum": ["cheap", "moderate", "expensive", "luxury"] 
+                            }
+                        ],
+                        "default": "moderate"
                     }
                 }         
             }
@@ -154,6 +168,20 @@
                             "type": "string"
                         }        
                     },
+                    "places_visit_budget":
+                    {
+                        "description": "Budget for the places_visit, either as a numeric amount or a descriptive word",
+                        "anyOf": [
+                            { 
+                                "type": "number" 
+                            },
+                            { 
+                                "type": "string", 
+                                "enum": ["cheap", "moderate", "expensive", "luxury"] 
+                            }
+                        ],
+                        "default": "moderate"
+                    },
                     "accomondation":
                     {
                         "description": "the accomodation user like to live in",
@@ -194,6 +222,20 @@
                             {
                                 "type": "string",
                                 "default": ""
+                            },
+                            "budegt":
+                            {
+                                "description": "Budget for the accomondation, either as a numeric amount or a descriptive word",
+                                "anyOf": [
+                                    { 
+                                        "type": "number" 
+                                    },
+                                    { 
+                                        "type": "string", 
+                                        "enum": ["cheap", "moderate", "expensive", "luxury"] 
+                                    }
+                                ],
+                                "default": "moderate"
                             }
                         }
                     },
@@ -226,6 +268,20 @@
                                     "description": "extra requirement on the food",
                                     "type": "string",
                                     "default":""
+                                },
+                                "budegt":
+                                {
+                                    "description": "Budget for the food, either as a numeric amount or a descriptive word",
+                                    "anyOf": [
+                                        { 
+                                            "type": "number" 
+                                        },
+                                        { 
+                                            "type": "string", 
+                                            "enum": ["cheap", "moderate", "expensive", "luxury"] 
+                                        }
+                                    ],
+                                    "default": "moderate"
                                 }
                             }
                         }
