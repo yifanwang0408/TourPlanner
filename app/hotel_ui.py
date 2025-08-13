@@ -25,14 +25,14 @@ class HotelInfo:
     
     @staticmethod
     def next_back_button(answer, key): 
-        cols = st.columns(4)  # create 2 columns
+        cols = st.columns(9)  # create 2 columns
 
         with cols[0]:
             if st.button("Back") and st.session_state.hotel_substep > 0:
                 st.session_state.hotel_substep -= 1
                 st.rerun()
 
-        with cols[3]:
+        with cols[8]:
             if st.button("Next") and answer.strip():
                 st.session_state.hotel_params[key] = answer
                 st.session_state.hotel_substep += 1

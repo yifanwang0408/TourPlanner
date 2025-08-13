@@ -23,14 +23,14 @@ class RestaurantInfo:
         self.keys_length = len(self.keys)
         
     def next_back_button(self, answer, key): 
-        cols = st.columns(4)  # create 2 columns
+        cols = st.columns(9)  # create 2 columns
 
         with cols[0]:
             if st.button("Back") and st.session_state.restaurant_substep > 0:
                 st.session_state.restaurant_substep -= 1
                 st.rerun()
 
-        with cols[3]:
+        with cols[8]:
             if st.button("Next") and answer.strip():
                 if key == "food_preference":
                     interests = tools.categorize_user_input(self.llm.llm, answer, restaurant_categories_str)

@@ -27,14 +27,14 @@ class WeatherInfo:
     
     @staticmethod
     def next_back_button(answer, key): 
-        cols = st.columns(4)  # create 2 columns
+        cols = st.columns(9)  # create 2 columns
 
         with cols[0]:
             if st.button("Back") and st.session_state.weather_substep > 0:
                 st.session_state.weather_substep -= 1
                 st.rerun()
 
-        with cols[3]:
+        with cols[8]:
             if st.button("Next") and answer.strip():
                 st.session_state.weather_params[key] = answer
                 st.session_state.weather_substep += 1
@@ -70,10 +70,7 @@ class WeatherInfo:
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
             st.write(summary)
             if st.button("Restart"):
-                st.session_state.weather_substep = 0
-                st.session_state.weather_params = {}
-                st.session_state.weather_invalid_fields = []
-                st.rerun()
+                self.reset()
         else:
             st.write(message)
             st.write("Do you want to re-enter these field?")
@@ -81,10 +78,7 @@ class WeatherInfo:
             with cols[0]:
                 if st.button("No"):
                     if st.button("Restart"):
-                        st.session_state.weather_substep = 0
-                        st.session_state.weather_params = {}
-                        st.session_state.weather_invalid_fields = []
-                        st.rerun()
+                        self.reset()
             with cols[3]:
                 if st.button("Yes"):
                     st.session_state.weather_substep += 1
