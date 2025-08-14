@@ -196,7 +196,7 @@ class Weather_WeatherAPI(Travel_info):
                 )
             else:
                 forecast_hour = None  # No forecast data available
-
+                
             if forecast_hour:
                 return {
                     "location": data["location"]["name"],

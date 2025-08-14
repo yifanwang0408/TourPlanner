@@ -64,14 +64,18 @@ class WeatherInfo:
         # All questions answered
         st.success("All questions answered!")
         self.present_input()
+        placeholder = st.empty() 
+        placeholder.markdown("## ⏳ Loading... Please wait")
         validity, message, st.session_state.weather_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "weather", st.session_state.weather_params)
         if validity == True:
             travel_info = self.weather.get_forecast(st.session_state.weather_params)
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
+            placeholder.empty()
             st.write(summary)
             if st.button("Restart"):
                 self.reset()
         else:
+            placeholder.empty()
             st.write(message)
             st.write("Do you want to re-enter these field?")
             cols = st.columns(4)  # create 2 columns

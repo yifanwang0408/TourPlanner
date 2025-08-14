@@ -40,8 +40,10 @@ prompt2 = (
     "Explain recommendations in a natural and conversational tone. You do not have to explain a lot, be concise but still informative. Follow similar format to the following sample:\n"
     "Day 1 (date) - city \n"
     "   - 9:30 flight arrive at airport\n"
+    "           expense/budget: 300 dollars\n"
     "   - 10:00-10:30 direction to attraction 1\n"
     "   - 11:00-12:00 visit the attraction 1\n"
+    "           expense/budget: 200 dollars\n"
     "       some description on the attraction 1"
     "   - 12:00-12:30 direction to attraction 2\n"
     "   - 13:00-13:30 visit the attraction 2\n"
@@ -50,7 +52,7 @@ prompt2 = (
     "       -description on hotel 1 and alternative choices\n\n"
     "   - Note: rainy day, remember bring rain coat\n"
     "Be sure to declare the approximate expanse for each activity and consider user's budget\n"
-    "You sould also give a conclusion on the budget at the end.\n"
+    "You should also give a conclusion on the budget at the end.\n"
     "!!IMPORTANT!!: Use emoji and indentation to make the output friendly"
 )
 

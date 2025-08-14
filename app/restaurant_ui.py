@@ -63,11 +63,14 @@ class RestaurantInfo:
         # All questions answered
         st.success("All questions answered!")
         self.present_input()
+        placeholder = st.empty() 
+        placeholder.markdown("## ⏳ Loading... Please wait")
         response  = tools.city_to_latlon(self.llm.llm, st.session_state.restaurant_params["city"], st.session_state.restaurant_params["additional_info"])
         st.session_state.restaurant_params["ll"] = response["ll"]
         st.session_state.restaurant_params["radius"] = response["radius"]
         travel_info = self.restaurant_api.get_restaurant(st.session_state.restaurant_params, limit=10)
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params)
+        placeholder.empty()
         st.write(summary)
         if st.button("Restart"):
             self.reset()

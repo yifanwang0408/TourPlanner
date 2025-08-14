@@ -61,10 +61,13 @@ class DirectionInfo:
         # All questions answered
         st.success("All questions answered!")
         self.present_input()
+        placeholder = st.empty() 
+        placeholder.markdown("## ⏳ Loading... Please wait")
         validity, message, st.session_state.direction_invalid_fields =  tools.validate_user_input_single_api_call_app(self.llm.llm, "direction", st.session_state.direction_params)
         if validity == True:
             travel_info = self.direction.get_directions(st.session_state.direction_params)
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "direction", travel_info, st.session_state.direction_params)
+            placeholder.empty()
             st.write(summary)
             if st.button("Restart"):
                         st.session_state.direction_substep = 0
@@ -72,6 +75,7 @@ class DirectionInfo:
                         st.session_state.direction_invalid_fields = []
                         st.rerun()
         else:
+            placeholder.empty()
             st.write(message)
             st.write("Do you want to re-enter these field?")
             cols = st.columns(4)  # create 2 columns

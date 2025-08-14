@@ -61,15 +61,19 @@ class HotelInfo:
         # All questions answered
         st.success("All questions answered!")
         self.present_input()
+        placeholder = st.empty() 
+        placeholder.markdown("## ⏳ Loading... Please wait")
         st.session_state.hotel_params["limit"] = 5
         validity, message, st.session_state.hotel_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "hotel", st.session_state.hotel_params)
         if validity == True:
             travel_info = self.hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=st.session_state.hotel_params)
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "hotel", travel_info, st.session_state.hotel_params)
+            placeholder.empty()
             st.write(summary)
             if st.button("Restart"):
                 self.reset()
         else:
+            placeholder.empty()
             st.write(message)
             st.write("Do you want to re-enter these field?")
             cols = st.columns(4)  # create 2 columns

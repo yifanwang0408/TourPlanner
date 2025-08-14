@@ -68,8 +68,12 @@ class AttractionInfo:
         response  = tools.city_to_latlon(self.llm.llm, st.session_state.attraction_params["city"], st.session_state.attraction_params["additional_info"])
         st.session_state.attraction_params["ll"] = response["ll"]
         st.session_state.attraction_params["radius"] = response["radius"]
+
+        placeholder = st.empty() 
+        placeholder.markdown("## ⏳ Loading... Please wait")
         travel_info = self.attraction_api.get_attractions(st.session_state.attraction_params, limit=10)
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params)
+        placeholder.empty()
         st.write(summary)
         if st.button("Restart"):
             self.reset()
