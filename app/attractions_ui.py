@@ -46,6 +46,9 @@ class AttractionInfo:
     def reset(self):
         st.session_state.attraction_substep = 0
         st.session_state.attraction_params = {}
+        
+        st.session_state.attraction_key_suffix = st.session_state.get("attraction_key_suffix", 0) + 1
+        
         st.rerun()
     
     def present_input(self):
@@ -57,8 +60,9 @@ class AttractionInfo:
     def initial_prompt(self):
         key = self.keys[self.substep]
         st.write(f"Q{self.substep + 1}: {site_visit_prompt[key]}")
-        answer = st.text_input("Please Enter:", key=f"attraction_{self.substep}")
-
+        #answer = st.text_input("Please Enter:", key=f"attraction_{self.substep}")
+        suffix = st.session_state.get("attraction_key_suffix", 0)
+        answer = st.text_input("Please Enter:", key=f"attraction_{self.substep}_{suffix}")
         self.next_back_button(answer, key)
         
     def output_page(self):
@@ -82,3 +86,9 @@ class AttractionInfo:
             self.initial_prompt()
         else:
             self.output_page()
+            
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        cols = st.columns([8, 2])
+        with cols[1]:
+            if st.button("Reset", use_container_width=True):
+                self.reset()

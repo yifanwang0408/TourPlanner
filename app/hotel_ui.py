@@ -42,6 +42,7 @@ class HotelInfo:
         st.session_state.hotel_substep = 0
         st.session_state.hotel_params = {}
         st.session_state.hotel_invalid_fields = []
+        st.session_state.hotel_key_suffix = st.session_state.get("hotel_key_suffix", 0) + 1
         st.rerun()
         
     def present_input(self):
@@ -53,8 +54,9 @@ class HotelInfo:
     def initial_prompt(self):
         key = self.keys[self.substep]
         st.write(f"Q{self.substep + 1}: {hotel_input_prompt[key]}")
-        answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
-
+        #answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
+        suffix = st.session_state.get("hotel_key_suffix", 0)
+        answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}_{suffix}")
         self.next_back_button(answer, key)
 
     def output_page(self):
@@ -104,3 +106,9 @@ class HotelInfo:
             self.output_page()
         else:
             self.reprompt()
+            
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        cols = st.columns([8, 2])
+        with cols[1]:
+            if st.button("Reset", use_container_width=True):
+                self.reset()

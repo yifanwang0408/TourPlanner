@@ -43,6 +43,9 @@ class FlightInfo:
         st.session_state.flight_substep = 0
         st.session_state.flight_params = {}
         st.session_state.flight_invalid_fields = []
+        
+        st.session_state.flight_key_suffix = st.session_state.get("flight_key_suffix", 0) + 1
+        
         st.rerun()
         
     def present_input(self):
@@ -54,7 +57,9 @@ class FlightInfo:
     def initial_prompt(self):
         key = self.keys[self.substep]
         st.write(f"Q{self.substep + 1}: {future_flight_input_prompt[key]}")
-        answer = st.text_input("Please Enter:", key=f"flight_{self.substep}")
+        #answer = st.text_input("Please Enter:", key=f"flight_{self.substep}")
+        suffix = st.session_state.get("flight_key_suffix", 0)
+        answer = st.text_input("Please Enter:", key=f"flight_{self.substep}_{suffix}")
 
         self.next_back_button(answer, key)
 
@@ -104,3 +109,9 @@ class FlightInfo:
             self.output_page()
         else:
             self.reprompt()
+            
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        cols = st.columns([8, 2])
+        with cols[1]:
+            if st.button("Reset", use_container_width=True):
+                self.reset()
