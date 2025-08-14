@@ -74,18 +74,15 @@ class WeatherInfo:
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
             placeholder.empty()
             st.write(summary)
-            if st.button("Restart"):
-                self.reset()
         else:
             placeholder.empty()
             st.write(message)
             st.write("Do you want to re-enter these field?")
-            cols = st.columns(4)  # create 2 columns
+            cols = st.columns(9)  # create 2 columns
             with cols[0]:
                 if st.button("No"):
-                    if st.button("Restart"):
-                        self.reset()
-            with cols[3]:
+                    self.reset()
+            with cols[8]:
                 if st.button("Yes"):
                     st.session_state.weather_substep += 1
                     st.rerun()

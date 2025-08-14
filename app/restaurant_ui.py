@@ -74,9 +74,7 @@ class RestaurantInfo:
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params)
         placeholder.empty()
         st.write(summary)
-        if st.button("Restart"):
-            self.reset()
-    
+        
     def run(self):
         st.title("Get Restaurants")
         st.text("Follow the steps to fetch restaurants")

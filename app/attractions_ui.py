@@ -79,8 +79,7 @@ class AttractionInfo:
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params)
         placeholder.empty()
         st.write(summary)
-        if st.button("Restart"):
-            self.reset()
+
     
     def run(self):
         st.title("Get Attractions")
