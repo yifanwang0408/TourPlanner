@@ -89,8 +89,9 @@ class PlanInfo:
             st.session_state.version += 1
             st.rerun()
         else:
-            plan = tools.refine_plan(self.llm.llm, original_plan, st.session_state.additinoal_requirement, {}, original_info)
-            st.session_state.plan.append(refetch_json, plan)
+            summary = tools.refine_plan(self.llm.llm, original_plan, st.session_state.additinoal_requirement, {}, original_info)
+            plan = Plan(st.session_state.additinoal_requirement, refetch_json,summary, len(st.session_state.plan)+1)
+            st.session_state.plan.append(plan)
             st.session_state.plan_substep = self.key_length
             st.session_state.version += 1
             st.rerun()
@@ -154,18 +155,28 @@ class PlanInfo:
             self.initial_plan()
             self.refine_prompt()
         else:
-            version_labels = [f"version {x+1}" for x in range(st.session_state["version"])]
+            version_labels = [f"version {x}" for x in range(st.session_state["version"], 0, -1)]
 
-            # Selectbox returns a string label
-            st.session_state["selected_version"] = st.selectbox(
-                "Choose a version:", version_labels
+            # Show selectbox with placeholder (no default selection)
+            selected_label = st.selectbox(
+                "Choose a version:",
+                options=version_labels,
+                index=None,  # Nothing preselected
+                placeholder="Select a version"
             )
 
-            # Convert selected label back to an integer index
-            selected_version = int(st.session_state["selected_version"].split()[-1])
-            self.output_refine(selected_version)
-            self.refine_prompt()
+            # Handle selection
+            if selected_label is None:
+                self.output_refine(st.session_state.version)
+                self.refine_prompt()
         
+            else:
+                # Convert selected label back to integer (e.g., "version 3" -> 3)
+                selected_version = int(selected_label.split()[-1])
+                st.session_state["selected_version"] = selected_version
+                self.output_refine(selected_version)
+                self.refine_prompt()
+            
 
 
 

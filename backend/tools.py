@@ -336,6 +336,7 @@ def refetch_check(llm: LLM, original_information:str, original_input: dict, addi
     response = chain.invoke({"information": original_information, "user_input": original_input, "additional_requirement": additional_requirement, "original_plan":original_plan, "user_input_json":schema_str})
     output = response["response"]
     output = json.loads(output)
+    print(output)
     if "properties" in output["refetch_json"]:
         return output["refetch"], output["fields"], output["refetch_json"]["properties"]
     else:
