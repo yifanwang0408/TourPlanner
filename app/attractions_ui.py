@@ -17,6 +17,8 @@ class AttractionInfo:
             st.session_state.attraction_params = {}
         if "attraction_substep" not in st.session_state:
             st.session_state.attraction_substep = 0
+        if "attraction_preference" not in st.session_state:
+            st.session_state.attraction_preference = ""
             
         self.substep = st.session_state.attraction_substep
         self.attraction_api = st.session_state.attraction_api
@@ -46,6 +48,7 @@ class AttractionInfo:
     def reset(self):
         st.session_state.attraction_substep = 0
         st.session_state.attraction_params = {}
+        st.session_state.attraction_preference = ""
         
         st.session_state.attraction_key_suffix = st.session_state.get("attraction_key_suffix", 0) + 1
         
@@ -64,7 +67,22 @@ class AttractionInfo:
         suffix = st.session_state.get("attraction_key_suffix", 0)
         answer = st.text_input("Please Enter:", key=f"attraction_{self.substep}_{suffix}")
         self.next_back_button(answer, key)
+
+    def preference_page(self):
+        st.write(f"Do you have any preference on attractions to visit?")
+        answer = st.text_input("Please Enter: ")
+        cols = st.columns(9)  
         
+        with cols[0]:
+            if st.button("Back") and st.session_state.attraction_substep > 0:
+                st.session_state.attraction_substep -= 1
+                st.rerun()
+        with cols[8]:
+            if st.button("Next"):
+                st.session_state.attraction_substep += 1
+                st.session_state.attraction_preference = answer
+                st.rerun()
+
     def output_page(self):
         # All questions answered
         st.success("All questions answered!")
@@ -76,7 +94,7 @@ class AttractionInfo:
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
         travel_info = self.attraction_api.get_attractions(st.session_state.attraction_params, limit=10)
-        summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params)
+        summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params, st.session_state.attraction_preference)
         placeholder.empty()
         st.write(summary)
 
@@ -87,6 +105,8 @@ class AttractionInfo:
         self.substep = st.session_state.attraction_substep
         if self.substep <  self.keys_length:
             self.initial_prompt()
+        elif self.substep == self.keys_length:
+            self.preference_page()
         else:
             self.output_page()
             

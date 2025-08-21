@@ -15,6 +15,8 @@ class RestaurantInfo:
             st.session_state.restaurant_params = {}
         if "restaurant_substep" not in st.session_state:
             st.session_state.restaurant_substep = 0
+        if "restaurant_preference" not in st.session_state:
+            st.session_state.restaurant_preference = ""
             
         self.substep = st.session_state.restaurant_substep
         self.restaurant_api = st.session_state.restaurant_api
@@ -44,8 +46,10 @@ class RestaurantInfo:
     def reset(self):
         st.session_state.restaurant_substep = 0
         st.session_state.restaurant_params = {}
+        st.session_state.restaurant_preference = ""
         st.session_state.restaurant_key_suffix = st.session_state.get("restaurant_key_suffix", 0) + 1
         st.rerun()
+    
         
     def present_input(self):
         st.write("Your Input:")
@@ -60,6 +64,22 @@ class RestaurantInfo:
         suffix = st.session_state.get("restaurant_key_suffix", 0)
         answer = st.text_input("Please Enter:", key=f"restaurant_{self.substep}_{suffix}")
         self.next_back_button(answer, key)
+    
+    
+    def preference_page(self):
+        st.write(f"Do you have any preference on food? ")
+        answer = st.text_input("Please Enter:")
+        cols = st.columns(9)  
+        
+        with cols[0]:
+            if st.button("Back") and st.session_state.restaurant_substep > 0:
+                st.session_state.restaurant_substep -= 1
+                st.rerun()
+        with cols[8]:
+            if st.button("Next"):
+                st.session_state.restaurant_substep += 1
+                st.session_state.restaurant_preference = answer
+                st.rerun()
         
     def output_page(self):
         # All questions answered
@@ -71,7 +91,7 @@ class RestaurantInfo:
         st.session_state.restaurant_params["ll"] = response["ll"]
         st.session_state.restaurant_params["radius"] = response["radius"]
         travel_info = self.restaurant_api.get_restaurant(st.session_state.restaurant_params, limit=10)
-        summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params)
+        summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params, st.session_state.attraction_preference)
         placeholder.empty()
         st.write(summary)
         
@@ -81,6 +101,8 @@ class RestaurantInfo:
         self.substep = st.session_state.restaurant_substep
         if self.substep <  self.keys_length:
             self.initial_prompt()
+        elif self.substep == self.keys_length:
+            self.preference_page()
         else:
             self.output_page()
             

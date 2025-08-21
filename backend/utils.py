@@ -350,7 +350,7 @@ def fetch_all_travel_info(data, hotel, flight, weather, attraction, restaurant):
         restaurant: the restaurant api class
 
     Return:
-        a dictionary including all travel information, where the key is category of info, and the value is the info fetched from api..
+        a dictionary including all travel information, where the key is category of info, and the value is the info fetched from api.
     """
     travel_info = {}
 
@@ -375,3 +375,44 @@ def fetch_all_travel_info(data, hotel, flight, weather, attraction, restaurant):
     return travel_info
            
 
+def fetch_additional_info(data, fields, hotel,flight,weather,attraction,restaurant):
+    """
+    Fetch additional information
+
+    Args:
+        data: parsed user input
+        hotel: the hotel api class
+        flight: the flight api class
+        weather: the weather api class
+        attraction: the attraction api class
+        restaurant: the restaurant api class
+
+    Return:
+        a dictionary including all travel information, where the key is category of info, and the value is the info fetched from api..
+    """
+    travel_info = {}
+    for field in fields:
+        if field == "hotel":
+            hotel_params, city_list = process_hotel_query_params(data)
+            travel_info["hotel"] = hotel.get_hotel("https://api.liteapi.travel/v3.0/data/hotels", hotel_params, city_list)
+
+        elif field == "flight":
+            flight_params = process_flight_quary_params(data)
+            travel_info["flight"] = flight.process_several_flights(flight_params)
+
+        elif field == "weather":
+            weather_params = get_weather_params(data)
+            travel_info["weather"] = weather.get_weather_multidays(weather_params)
+
+        elif field == "sites_visit":
+            site_params, keys_list = get_site_params(data)
+            site_list = attraction.get_attraction_list(site_params, keys_list)
+            travel_info["site"] = site_list
+
+        else:
+            #Restaurant info
+            meal_params, meal_keys = process_meal_params(data)
+            meal_list = restaurant.get_restaurant_list(meal_params, meal_keys)
+            travel_info["meal"] = meal_list
+    print("additional info ", travel_info)
+    return travel_info

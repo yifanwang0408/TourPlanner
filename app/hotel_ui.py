@@ -17,6 +17,9 @@ class HotelInfo:
             st.session_state.hotel_substep = 0
         if "hotel_invalid_fields" not in st.session_state:
             st.session_state.hotel_invalid_fields = []
+        if "hotel_preference" not in st.session_state:
+            st.session_state.hotel_preference = ""
+            
         self.substep = st.session_state.hotel_substep
         self.hotel_lite = st.session_state.hotel_lite
         self.keys = ["city", "countryCode", "minRating", "starRating"]
@@ -85,9 +88,24 @@ class HotelInfo:
                     st.session_state.hotel_substep += 1
                     st.rerun()
         
+    def preference_page(self):
+        st.write(f"Do you have any preference on hotel?")
+        answer = st.text_input("Please Enter: ")
+        cols = st.columns(9)  
+        
+        with cols[0]:
+            if st.button("Back") and st.session_state.hotel_substep > 0:
+                st.session_state.hotel_substep -= 1
+                st.rerun()
+        with cols[8]:
+            if st.button("Next"):
+                st.session_state.hotel_substep += 1
+                st.session_state.hotel_preference = answer
+                st.rerun()
+        
     def reprompt(self):
-        if self.substep < self.keys_length + len(st.session_state.hotel_invalid_fields) + 1:
-            key = st.session_state.hotel_invalid_fields[self.substep-( self.keys_length+1)]
+        if self.substep < self.keys_length + len(st.session_state.hotel_invalid_fields) + 2:
+            key = st.session_state.hotel_invalid_fields[self.substep-( self.keys_length+2)]
             st.write(f"Q{self.substep + 1}: {hotel_input_prompt[key]}")
             answer = st.text_input("Please Enter:", key=f"hotel_{self.substep}")
 
@@ -104,6 +122,8 @@ class HotelInfo:
         if self.substep <  self.keys_length:
             self.initial_prompt()
         elif self.substep ==  self.keys_length:
+            self.preference_page()
+        elif self.substep == self.keys_length+1:
             self.output_page()
         else:
             self.reprompt()

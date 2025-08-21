@@ -1,5 +1,5 @@
 from langchain.tools import tool
-from prompts import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt_parsing_output
+from prompts import prompt1, prompt2, prompt3, prompt4, prompt5, prompt6, prompt_parsing_output,prompt_determine_refetch,prompt_inprove
 import json
 from datetime import date
 
@@ -103,7 +103,7 @@ def generate_plan(llm: LLM, user_input: str, parsed_input: dict, travel_info: di
     })
     return response["response"]
 
-def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, search_info: dict, user_input: dict) -> str:
+def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, search_info: dict, user_input: dict, preference:str="") -> str:
     system_prompt_template = SystemMessagePromptTemplate.from_template(prompt3)
     user_prompt_template = HumanMessagePromptTemplate.from_template("{user_input}")
     prompt = ChatPromptTemplate.from_messages([system_prompt_template, user_prompt_template])
@@ -112,6 +112,7 @@ def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, sea
         {
             "travel_component": lambda x: x["travel_component"],
             "info_json": lambda x: x["info_json"],
+            "preference": lambda x: x["preference"],
             "user_input": lambda x: x["user_input"]
         }
         | prompt
@@ -121,6 +122,7 @@ def generate_travel_info_search_summary(llm: LLM, travel_info_category: str, sea
     response = chain.invoke({
         "travel_component": travel_info_category,
         "info_json": search_info,
+        "preference": preference,
         "user_input": user_input
     })
     print(response["response"])
@@ -293,4 +295,87 @@ def validate_user_input_single_api_call_app(llm: LLM, travel_info_category: str,
         return True, "✅ All fields valid.", []
     else:
         return False, f"🚫 {output['message']}", output["invalid_fields"]
+
+
+def refetch_check(llm: LLM, original_information:str, original_input: dict, additional_requirement:str, original_plan:str, user_input_schema:str)-> tuple:
+    """
+    The function call LLM determine if additional information is needed in order to improve the plan based on user's need.
+
+    Args:
+        original_information (str): the travel information from the original fetch
+        original_input: the original user input parsed
+        additional_requirement (str): user's additional requirements
+        origional_plan (str): original plan needed to get refined
+        user_input_schema (str): the address of the user input schema
+
+    Return:
+        (refetch (bool), fields (list), refetch_json (dict))
+    """
+
+    with open(user_input_schema, "r") as f:
+        schema_str = json.load(f)
+
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt_determine_refetch)
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+    ])
+    
+    chain = (
+        {   "information": lambda x: x["information"],
+            "user_input": lambda x: x["user_input"],
+            "additional_requirement": lambda x: x["additional_requirement"],
+            "original_plan": lambda x: x["original_plan"],
+            "user_input_json": lambda x: x["user_input_json"]
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} 
+    )
+    response = chain.invoke({"information": original_information, "user_input": original_input, "additional_requirement": additional_requirement, "original_plan":original_plan, "user_input_json":schema_str})
+    output = response["response"]
+    output = json.loads(output)
+    if "properties" in output["refetch_json"]:
+        return output["refetch"], output["fields"], output["refetch_json"]["properties"]
+    else:
+        return output["refetch"], output["fields"], output["refetch_json"]
+
+
+
+def refine_plan(llm: LLM, original_plan: str, additional_requirement:str, additional_information: dict, original_info: dict):
+    """
+    The function call LLM to improve the plan based on user's additional requirements
+
+    Args:
+        original_info (str): the travel information from the original fetch
+        additional_information (dict): additional information fetched
+        additional_requirement (str): user's additional requirements
+        origional_plan (str): original plan needed to get refined
+        
+    Return:
+        a refined plan
+    """
+
+
+    #system prompt
+    system_prompt_template = SystemMessagePromptTemplate.from_template(prompt_inprove)
+
+    prompt = ChatPromptTemplate.from_messages([
+        system_prompt_template, 
+    ])
+    
+    chain = (
+        {   "additional_requirement": lambda x: x["additional_requirement"],
+            "original_plan": lambda x: x["original_plan"],
+            "original_info": lambda x: x["original_info"],
+            "additional_information": lambda x: x["additional_information"],
+        } 
+        | prompt 
+        | llm
+        | {"response": lambda x: x.content} 
+    )
+    response = chain.invoke({"additional_requirement": additional_information, "original_plan": original_plan, "original_info":original_info, "additional_information": additional_information})
+    output = response["response"]
+    return output
     

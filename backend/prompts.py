@@ -61,7 +61,12 @@ prompt3 = (
     "You are a helpful AI travel planner assistant. Your job is to generate a natural and conversational output based on the json containing information on one travel information.\n"
     "The travel information of the json file is on: {travel_component}\n"
     "This is the information in json format: {info_json}\n"
-    "Be detailed on explaining the travel information fetched online, but not wordy (Be sure to give a brief introduction on the information). Use emoji and identation to make the output more user friendly. Add maps and images if appropriates."
+    "Any preference (used for sorting result): {preference}\n"
+    "If preference is an empty string, assume no preference\n"
+    "If there are multiple and enough choices in the travel information, try to output at least five to ten choices with their rating\n"
+    "Important: Be detailed on explaining the travel information fetched online, but not wordy \n"
+    "!!Besides offering basic information, be sure to give a brief introduction on the information. For example, the restaurant offers great Chinese food, and is known for its dumplings. \n"
+    "Use emoji and identation to make the output more user friendly. Add maps and images if appropriates. If there is publicly accessible URL images provided in information json, also output the url to the images in appropriate position."
 )
 
 prompt4 = (
@@ -115,9 +120,33 @@ prompt_parsing_output = (
 )
 
 
+prompt_determine_refetch = (
+    "You are a helpful AI travel planner assistant. Your task is to determine if additional information is needed in order to improve the plan based on user's need.\n"
+    "You are given:\n"
+    "   -information already fetched: {information}\n"
+    "   -user's original input: {user_input}\n"
+    "   -user' additinoal requirement: {additional_requirement}\n"
+    "   -original plan: {original_plan}\n"
+    "   -user input json\n"
+    "Please structure your output strictly as a JSON object with the following fields:\n"
+    "   -refetch(bool): True if need more information, and False otherwise\n"
+    "   -fields (list of strings): fields needed to refetch for information. Avaliable fields are 'hotel', 'flight', 'weather', 'sites_visit', 'restaurant'\n"
+    "   -refetch_json: based on the fields needed to refetch for information, parse it into exact user inpur json format as following: \n"
+    "{user_input_json}\n"
+    "Start the parsing from the original input, and adjust fields needed to refetch. Make sure even some fields don't need to be refetched, keep the origin value as in user original input. Important: all fields should be filled\n"
+    "If the information already fetched already give the information needed, return Fakse for refetch"
+    "Important: Respond with ONLY the JSON object. No explanations, no markdown formatting.\n"
+)
 
-
-# Prompt dictionaries
+prompt_inprove = (
+    "You are a helpful AI travel planner assistant. Your task is to improve the plan based on user's additional requirements\n"
+    "You are given:\n"
+    "   -user's additional requirement:{additional_requirement}\n"
+    "   -original plan: {original_plan}\n"
+    "   -original information: {original_info}"
+    "   -additional information: {additional_information}\n"
+    "Refine the original plan based on user's additional requirement and additional information. Try to only focues on refining the plan based on the fields mentinoed the additional requirements\n"
+)
 
 hotel_input_prompt = {
     "city": "Enter city: ",

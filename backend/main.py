@@ -50,8 +50,9 @@ def main():
             params["limit"] = 3
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "hotel", params)
             if validity:
+                user_preference = input("Any preference on the hotel?: ")
                 travel_info = hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels", params=params)
-                summary = tools.generate_travel_info_search_summary(llm.llm, "hotel", travel_info, params)
+                summary = tools.generate_travel_info_search_summary(llm.llm, "hotel", travel_info, params, user_preference)
                 print(summary)
             else:
                 print(message)
@@ -64,7 +65,7 @@ def main():
             #validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "weather", params)
             if validity:
                 travel_info = weather.get_forecast(params)
-                summary = tools.generate_travel_info_search_summary(llm.llm, "weather", travel_info, params)
+                summary = tools.generate_travel_info_search_summary(llm.llm, "weather", travel_info, params, "no")
                 print(summary)
             else:
                 print(message)
@@ -75,7 +76,7 @@ def main():
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "direction", params)
             if validity:
                 travel_info = direction.get_directions(params)
-                summary = tools.generate_travel_info_search_summary(llm.llm, "direction", travel_info, params)
+                summary = tools.generate_travel_info_search_summary(llm.llm, "direction", travel_info, params, "no")
                 print(summary)
             else:
                 print(message)
@@ -85,8 +86,9 @@ def main():
             params = search_prompt.prompt_furture_flight(llm.llm)
             validity, message, invalid_fields = tools.validate_user_input_single_api_call(llm.llm, "flight", params)
             if validity:
+                user_preference = input("Any preference on the flight?: ")
                 travel_info = future_flight.get_future_flight_schedules(params)
-                summary = tools.generate_travel_info_search_summary(llm.llm, "flight", travel_info, params)
+                summary = tools.generate_travel_info_search_summary(llm.llm, "flight", travel_info, params,user_preference)
                 print(summary)
             else:
                 print(message)
@@ -94,14 +96,16 @@ def main():
 
         elif choice == "5":
             params = search_prompt.prompt_site_visit(llm.llm)
-            travel_info = attraction_api.get_attractions(params, limit=5)
-            summary = tools.generate_travel_info_search_summary(llm.llm, "site", travel_info, params)
+            user_preference = input("Any preference on places to visit?: ")
+            travel_info = attraction_api.get_attractions(params, limit=10)
+            summary = tools.generate_travel_info_search_summary(llm.llm, "site", travel_info, params, user_preference)
             print(summary)
 
         elif choice == "6":
             params = search_prompt.prompt_restaurant(llm.llm)
-            travel_info = restaurant_api.get_restaurant(params, limit=5)
-            summary = tools.generate_travel_info_search_summary(llm.llm, "restaurant", travel_info, params)
+            user_preference = input("Any preference on the restaurant: ")
+            travel_info = restaurant_api.get_restaurant(params, limit=10)
+            summary = tools.generate_travel_info_search_summary(llm.llm, "restaurant", travel_info, params, user_preference)
             print(summary)
 
         elif choice == "7":
