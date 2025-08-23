@@ -334,6 +334,7 @@ def refetch_check(llm: LLM, original_information:str, original_input: dict, addi
         | {"response": lambda x: x.content} 
     )
     response = chain.invoke({"information": original_information, "user_input": original_input, "additional_requirement": additional_requirement, "original_plan":original_plan, "user_input_json":schema_str})
+    print("response:\n", response)
     output = response["response"]
     output = json.loads(output)
     print(output)
@@ -376,7 +377,7 @@ def refine_plan(llm: LLM, original_plan: str, additional_requirement:str, additi
         | llm
         | {"response": lambda x: x.content} 
     )
-    response = chain.invoke({"additional_requirement": additional_information, "original_plan": original_plan, "original_info":original_info, "additional_information": additional_information})
+    response = chain.invoke({"additional_requirement": additional_requirement, "original_plan": original_plan, "original_info":original_info, "additional_information": additional_information})
     output = response["response"]
     return output
     

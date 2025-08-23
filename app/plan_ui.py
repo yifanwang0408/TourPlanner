@@ -67,6 +67,7 @@ class PlanInfo:
         answer = st.text_input("Please enter")
         if st.button("Refine") and answer.strip():
             st.session_state.additinoal_requirement = answer
+            print("additional requirement: ", st.session_state.additinoal_requirement)
             st.session_state.plan_substep += 1
             st.rerun()
 
@@ -74,7 +75,6 @@ class PlanInfo:
         #refetch check
         original_info = st.session_state.info[0]
         original_input, original_plan = st.session_state.plan[-1].user_input, st.session_state.plan[-1].plan
-        print()
         refetch, fields, refetch_json = tools.refetch_check(self.llm.llm, original_info, original_input, st.session_state.additinoal_requirement, original_plan, "backend/schemas/user_input.schema.json")
         if refetch:
             #get additional info

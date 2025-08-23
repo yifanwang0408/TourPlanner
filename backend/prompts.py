@@ -12,11 +12,11 @@ prompt1 = (
 
     "For each day, extract user's interests of place to visit, available categories are:\n" 
     "'Art Gallery','Museum','Aquarium','Attraction','Amusement Park','Movie Theater','Planetarium','Historic Site','Science Museum','Performing Arts Venue','Concert Hall','Music Venue','Theme Park','Water Park','Zoo','Stadium','Sports Arena','Observation Deck','Botanical Garden','Park','Harbor / Marina','Beach'\n"
-    "If user does not specify where they want to visit, based on the city for each day and what are valueble to visit in this city, choose 3-5 categories for places_visit.\n\n "
+    "!!!Important: The interest should be only from the avaliable category and exactly the same as what has been listed above. If user's choice isn't in the ones listed above, based on the city for each day and what are valueble to visit in this city, choose 3-5 categories for places_visit.\n\n "
 
     "For each day, extract user's preference on meal, avaliable type of food are:\n"
     "'Restaurant','Cafe / Coffee Shop','Bar','Fast Food Restaurant','Burger Joint','Pizza Place','Sushi Restaurant','Italian Restaurant','Mexican Restaurant','Thai Restaurant','Vietnamese Restaurant','Korean BBQ Restaurant','Seafood Restaurant','Vegetarian / Vegan Restaurant','Steakhouse','Breakfast Spot','Ice Cream Shop','Bakery','Wine Bar','Cocktail Bar','Tea Room','Food Truck','Buffet'\n"
-    "The food type should be only from the avaliable type and exactly the same as what has been listed above If user's choice isn't in the ones listed above, just choose the food type as Restaurant, and put user's preference in the extra_requirement field.\n\n"
+    "!!!Important:The food type should be only from the avaliable type and exactly the same as what has been listed above If user's choice isn't in the ones listed above, just choose the food type as Restaurant, and put user's preference in the extra_requirement field.\n\n"
     "Based on user's input on origin, destination, and cities to travel, generate a flights in the flights field in schema. If there are multiple airport in the city, consider them all in the flights field to maximize the probablity to find a flight.\n"
     "If the city does not have an airport, find some nearest ones.\n\n"
     "For city to city during the trip, schedule flights if needed.\n\n"
@@ -52,6 +52,10 @@ prompt2 = (
     "       -description on hotel 1 and alternative choices\n\n"
     "   - Note: rainy day, remember bring rain coat\n"
     "Be sure to declare the approximate expanse for each activity and consider user's budget\n"
+    "Important: For each activity:\n"
+    "   1.declare the time will spend on this activity. Also leave enough time for transportation. \n"
+    "   2. Depending on user's request on activities, give reasonable time on each activity\n"
+    "   3. List the budget\n"
     "You should also give a conclusion on the budget at the end.\n"
     "!!IMPORTANT!!: Use emoji and indentation to make the output friendly"
 )
@@ -135,7 +139,7 @@ prompt_determine_refetch = (
     "{user_input_json}\n"
     "Start the parsing from the original input, and adjust fields needed to refetch. Make sure even some fields don't need to be refetched, keep the origin value as in user original input. Important: all fields should be filled\n"
     "If the information already fetched already give the information needed, return Fakse for refetch"
-    "Important: Respond with ONLY the JSON object. No explanations, no markdown formatting.\n"
+    "!!IMPORTANT: Respond should only be in JSON object. No explanations, no markdown formatting.\n"
 )
 
 prompt_inprove = (
@@ -145,7 +149,8 @@ prompt_inprove = (
     "   -original plan: {original_plan}\n"
     "   -original information: {original_info}"
     "   -additional information: {additional_information}\n"
-    "Refine the original plan based on user's additional requirement and additional information. Try to only focues on refining the plan based on the fields mentinoed the additional requirements\n"
+    "Refine the original plan based on user's additional requirement and additional information. Try to focues on refining the plan based on the fields mentinoed the additional requirements. !Important: take more consideration of the additional requirement.\n"
+    "After outputing the plan, give a brief summary on what this plan has refined from the original plan.\n"
 )
 
 hotel_input_prompt = {
