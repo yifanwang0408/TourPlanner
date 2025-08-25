@@ -74,6 +74,7 @@ class WeatherInfo:
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
             placeholder.empty()
             st.write(summary)
+            st.caption("The information is powered by OpenWeatherMap.")
         else:
             placeholder.empty()
             st.write(message)
@@ -96,7 +97,7 @@ class WeatherInfo:
             self.next_back_button(answer, key)
             
         else:
-            st.session_state.weather_substep =  self.keys_length
+            st.session_state.weather_substep =  self.keys_length+1
             st.rerun()
 
     def run(self):

@@ -92,8 +92,9 @@ class FlightInfo:
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "flight", travel_info, st.session_state.flight_params)
             placeholder.empty()
             st.write(summary)
+            st.caption("The information is powered by aviationstack.")
         else:
-            placeholder = st.empty() 
+            placeholder.empty() 
             st.write(message)
             st.write("Do you want to re-enter these field?")
             cols = st.columns(9)  # create 2 columns
@@ -104,6 +105,7 @@ class FlightInfo:
                 if st.button("Yes"):
                     st.session_state.flight_substep += 1
                     st.rerun()
+
         
     def reprompt(self):
         if self.substep < len(self.keys) + len(st.session_state.flight_invalid_fields) + 2:
@@ -114,7 +116,7 @@ class FlightInfo:
             self.next_back_button(answer, key)
             
         else:
-            st.session_state.flight_substep =  self.keys_length
+            st.session_state.flight_substep =  self.keys_length+1
             st.rerun()
 
     def run(self):

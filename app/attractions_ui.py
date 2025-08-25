@@ -97,6 +97,8 @@ class AttractionInfo:
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params, st.session_state.attraction_preference)
         placeholder.empty()
         st.write(summary)
+        st.caption("The information is powered by FOURSQUARE.")
+    
 
     
     def run(self):

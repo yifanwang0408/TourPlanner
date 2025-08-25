@@ -94,6 +94,7 @@ class RestaurantInfo:
         summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params, st.session_state.attraction_preference)
         placeholder.empty()
         st.write(summary)
+        st.caption("The information is powered by FOURSQUARE.")
         
     def run(self):
         st.title("Get Restaurants")

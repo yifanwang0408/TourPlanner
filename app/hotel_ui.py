@@ -75,6 +75,7 @@ class HotelInfo:
             summary = tools.generate_travel_info_search_summary(self.llm.llm, "hotel", travel_info, st.session_state.hotel_params)
             placeholder.empty()
             st.write(summary)
+            st.caption("The information is powered by liteAPI.")
         else:
             placeholder.empty()
             st.write(message)
@@ -112,7 +113,7 @@ class HotelInfo:
             self.next_back_button(answer, key)
             
         else:
-            st.session_state.hotel_substep =  self.keys_length
+            st.session_state.hotel_substep =  self.keys_length+1
             st.rerun()
 
     def run(self):

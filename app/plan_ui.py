@@ -1,3 +1,4 @@
+import json
 import streamlit as st
 from backend.utils import fetch_all_travel_info, fetch_additional_info
 import backend.tools as tools
@@ -55,6 +56,16 @@ class PlanInfo:
         st.write(st.session_state.user_input)
             
         st.markdown("\n---\n")
+
+
+    def gather_travel_info(self):
+        info_string = ""
+        index = 0
+        for info in st.session_state.info:
+            info_string += f"information version {index+1}: {json.dumps(info)}"
+            index += 1
+        return info_string            
+
 
     def reset(self):
         st.session_state.plan_substep = 0
@@ -154,6 +165,7 @@ class PlanInfo:
             selected_version = int(st.session_state["selected_version"].split()[-1])
             self.initial_plan()
             self.refine_prompt()
+            st.caption("The information is powered by OpenRouteService, OpenWeatherMap, FOURSQUARE, liteAPI, and aviationstack.")
         else:
             version_labels = [f"version {x}" for x in range(st.session_state["version"], 0, -1)]
 
