@@ -97,7 +97,7 @@ class WeatherInfo:
             self.next_back_button(answer, key)
             
         else:
-            st.session_state.weather_substep =  self.keys_length+1
+            st.session_state.weather_substep =  self.keys_length
             st.rerun()
 
     def run(self):

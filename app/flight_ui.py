@@ -76,7 +76,7 @@ class FlightInfo:
                 st.rerun()
         with cols[8]:
             if st.button("Next"):
-                st.session_state.flight_substep_substep += 1
+                st.session_state.flight_substep += 1
                 st.session_state.flight_preference = answer
                 st.rerun()
 
