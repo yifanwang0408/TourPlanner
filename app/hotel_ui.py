@@ -19,6 +19,8 @@ class HotelInfo:
             st.session_state.hotel_invalid_fields = []
         if "hotel_preference" not in st.session_state:
             st.session_state.hotel_preference = ""
+        if "hotel_summary_stored" not in st.session_state:
+            st.session_state.hotel_summary_stored = {}
             
         self.substep = st.session_state.hotel_substep
         self.hotel_lite = st.session_state.hotel_lite
@@ -69,25 +71,31 @@ class HotelInfo:
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
         st.session_state.hotel_params["limit"] = 5
-        validity, message, st.session_state.hotel_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "hotel", st.session_state.hotel_params)
-        if validity == True:
-            travel_info = self.hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=st.session_state.hotel_params)
-            summary = tools.generate_travel_info_search_summary(self.llm.llm, "hotel", travel_info, st.session_state.hotel_params)
+        if str(st.session_state.hotel_params) in st.session_state.hotel_summary_stored.keys():
             placeholder.empty()
-            st.write(summary)
+            st.write(st.session_state.hotel_summary_stored[str(st.session_state.hotel_params)])
             st.caption("The information is powered by liteAPI.")
         else:
-            placeholder.empty()
-            st.write(message)
-            st.write("Do you want to re-enter these field?")
-            cols = st.columns(9)  # create 2 columns
-            with cols[0]:
-                if st.button("No"):
-                    self.reset()
-            with cols[8]:
-                if st.button("Yes"):
-                    st.session_state.hotel_substep += 1
-                    st.rerun()
+            validity, message, st.session_state.hotel_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "hotel", st.session_state.hotel_params)
+            if validity == True:
+                travel_info = self.hotel_lite.get_hotel_list(url="https://api.liteapi.travel/v3.0/data/hotels",params=st.session_state.hotel_params)
+                summary = tools.generate_travel_info_search_summary(self.llm.llm, "hotel", travel_info, st.session_state.hotel_params)
+                placeholder.empty()
+                st.write(summary)
+                st.session_state.hotel_summary_stored[str(st.session_state.hotel_params)] = summary
+                st.caption("The information is powered by liteAPI.")
+            else:
+                placeholder.empty()
+                st.write(message)
+                st.write("Do you want to re-enter these field?")
+                cols = st.columns(9)  # create 2 columns
+                with cols[0]:
+                    if st.button("No"):
+                        self.reset()
+                with cols[8]:
+                    if st.button("Yes"):
+                        st.session_state.hotel_substep += 1
+                        st.rerun()
         
     def preference_page(self):
         st.write(f"Do you have any preference on hotel?")

@@ -18,6 +18,8 @@ class WeatherInfo:
             st.session_state.weather_substep = 0
         if "weather_invalid_fields" not in st.session_state:
             st.session_state.weather_invalid_fields = []
+        if "weather_summary_stored" not in st.session_state:
+            st.session_state.weather_summary_stored = {}
             
         self.substep = st.session_state.weather_substep
         self.weather = st.session_state.weather
@@ -68,25 +70,31 @@ class WeatherInfo:
         self.present_input()
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
-        validity, message, st.session_state.weather_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "weather", st.session_state.weather_params)
-        if validity == True:
-            travel_info = self.weather.get_forecast(st.session_state.weather_params)
-            summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
+        if str(st.session_state.weather_params) in st.session_state.weather_summary_stored.keys():
             placeholder.empty()
-            st.write(summary)
+            st.write(st.session_state.weather_summary_stored[str(st.session_state.weather_params)])
             st.caption("The information is powered by OpenWeatherMap.")
         else:
-            placeholder.empty()
-            st.write(message)
-            st.write("Do you want to re-enter these field?")
-            cols = st.columns(9)  # create 2 columns
-            with cols[0]:
-                if st.button("No"):
-                    self.reset()
-            with cols[8]:
-                if st.button("Yes"):
-                    st.session_state.weather_substep += 1
-                    st.rerun()
+            validity, message, st.session_state.weather_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "weather", st.session_state.weather_params)
+            if validity == True:
+                travel_info = self.weather.get_forecast(st.session_state.weather_params)
+                summary = tools.generate_travel_info_search_summary(self.llm.llm, "weather", travel_info, st.session_state.weather_params)
+                placeholder.empty()
+                st.write(summary)
+                st.session_state.weather_summary_stored[str(st.session_state.weather_params)] = summary
+                st.caption("The information is powered by OpenWeatherMap.")
+            else:
+                placeholder.empty()
+                st.write(message)
+                st.write("Do you want to re-enter these field?")
+                cols = st.columns(9)  # create 2 columns
+                with cols[0]:
+                    if st.button("No"):
+                        self.reset()
+                with cols[8]:
+                    if st.button("Yes"):
+                        st.session_state.weather_substep += 1
+                        st.rerun()
                     
     def reprompt(self):
         if self.substep < self.keys_length + len(st.session_state.weather_invalid_fields) + 1:

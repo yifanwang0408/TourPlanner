@@ -17,6 +17,8 @@ class RestaurantInfo:
             st.session_state.restaurant_substep = 0
         if "restaurant_preference" not in st.session_state:
             st.session_state.restaurant_preference = ""
+        if "restaurant_summary_stored" not in st.session_state:
+            st.session_state.restaurant_summary_stored = {}
             
         self.substep = st.session_state.restaurant_substep
         self.restaurant_api = st.session_state.restaurant_api
@@ -87,13 +89,18 @@ class RestaurantInfo:
         self.present_input()
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
-        response  = tools.city_to_latlon(self.llm.llm, st.session_state.restaurant_params["city"], st.session_state.restaurant_params["additional_info"])
-        st.session_state.restaurant_params["ll"] = response["ll"]
-        st.session_state.restaurant_params["radius"] = response["radius"]
-        travel_info = self.restaurant_api.get_restaurant(st.session_state.restaurant_params, limit=10)
-        summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params, st.session_state.attraction_preference)
-        placeholder.empty()
-        st.write(summary)
+        if str(st.session_state.restaurant_params) in st.session_state.restaurant_summary_stored.keys():
+            placeholder.empty()
+            st.write(st.session_state.restaurant_summary_stored[str(st.session_state.restaurant_params)])
+        else:
+            response  = tools.city_to_latlon(self.llm.llm, st.session_state.restaurant_params["city"], st.session_state.restaurant_params["additional_info"])
+            st.session_state.restaurant_params["ll"] = response["ll"]
+            st.session_state.restaurant_params["radius"] = response["radius"]
+            travel_info = self.restaurant_api.get_restaurant(st.session_state.restaurant_params, limit=10)
+            summary = tools.generate_travel_info_search_summary(self.llm.llm, "restaurant", travel_info, st.session_state.restaurant_params, st.session_state.restaurant_preference)
+            placeholder.empty()
+            st.write(summary)
+            st.session_state.restaurant_summary_stored[str(st.session_state.restaurant_params)] = summary
         st.caption("The information is powered by FOURSQUARE.")
         
     def run(self):

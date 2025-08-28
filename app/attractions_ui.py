@@ -19,12 +19,15 @@ class AttractionInfo:
             st.session_state.attraction_substep = 0
         if "attraction_preference" not in st.session_state:
             st.session_state.attraction_preference = ""
+        if "attraction_summary_stored" not in st.session_state:
+            st.session_state.attraction_summary_stored = {}
             
         self.substep = st.session_state.attraction_substep
         self.attraction_api = st.session_state.attraction_api
         self.keys = ["city", "additional_info", "interest"]
         self.llm = llm
         self.keys_length = len(self.keys)
+        
     
     def next_back_button(self, answer, key): 
         cols = st.columns(9)  # create 2 columns
@@ -87,16 +90,20 @@ class AttractionInfo:
         # All questions answered
         st.success("All questions answered!")
         self.present_input()
-        response  = tools.city_to_latlon(self.llm.llm, st.session_state.attraction_params["city"], st.session_state.attraction_params["additional_info"])
-        st.session_state.attraction_params["ll"] = response["ll"]
-        st.session_state.attraction_params["radius"] = response["radius"]
-
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
-        travel_info = self.attraction_api.get_attractions(st.session_state.attraction_params, limit=10)
-        summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params, st.session_state.attraction_preference)
-        placeholder.empty()
-        st.write(summary)
+        if str(st.session_state.attraction_params) in st.session_state.attraction_summary_stored.keys():
+            placeholder.empty()
+            st.write(st.session_state.attraction_summary_stored[str(st.session_state.attraction_params)])
+        else:
+            response  = tools.city_to_latlon(self.llm.llm, st.session_state.attraction_params["city"], st.session_state.attraction_params["additional_info"])
+            st.session_state.attraction_params["ll"] = response["ll"]
+            st.session_state.attraction_params["radius"] = response["radius"]
+            travel_info = self.attraction_api.get_attractions(st.session_state.attraction_params, limit=10)
+            summary = tools.generate_travel_info_search_summary(self.llm.llm, "site", travel_info, st.session_state.attraction_params, st.session_state.attraction_preference)
+            placeholder.empty()
+            st.write(summary)
+            st.session_state.attraction_summary_stored[str(st.session_state.attraction_params)] = summary
         st.caption("The information is powered by FOURSQUARE.")
     
 

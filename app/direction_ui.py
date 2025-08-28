@@ -16,6 +16,8 @@ class DirectionInfo:
             st.session_state.direction_substep = 0
         if "direction_invalid_fields" not in st.session_state:
             st.session_state.direction_invalid_fields = []
+        if "direction_summary_stored" not in st.session_state:
+            st.session_state.direction_summary_stored = {}
             
         self.substep = st.session_state.direction_substep
         self.direction = st.session_state.direction
@@ -65,27 +67,32 @@ class DirectionInfo:
         self.present_input()
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
-        validity, message, st.session_state.direction_invalid_fields =  tools.validate_user_input_single_api_call_app(self.llm.llm, "direction", st.session_state.direction_params)
-        if validity == True:
-            travel_info = self.direction.get_directions(st.session_state.direction_params)
-            summary = tools.generate_travel_info_search_summary(self.llm.llm, "direction", travel_info, st.session_state.direction_params)
+        if str(st.session_state.direction_params) in st.session_state.direction_summary_stored.keys():
             placeholder.empty()
-            st.write(summary)
+            st.write(st.session_state.direction_summary_stored[str(st.session_state.direction_params)])
             st.caption("The information is powered by OpenRouteService.")
-            
-
         else:
-            placeholder.empty()
-            st.write(message)
-            st.write("Do you want to re-enter these field?")
-            cols = st.columns(9)  # create 2 columns
-            with cols[0]:
-                if st.button("No"):
-                    self.reset()    
-            with cols[8]:
-                if st.button("Yes"):
-                    st.session_state.direction_substep += 1
-                    st.rerun()
+            validity, message, st.session_state.direction_invalid_fields =  tools.validate_user_input_single_api_call_app(self.llm.llm, "direction", st.session_state.direction_params)
+            if validity == True:
+                travel_info = self.direction.get_directions(st.session_state.direction_params)
+                summary = tools.generate_travel_info_search_summary(self.llm.llm, "direction", travel_info, st.session_state.direction_params)
+                placeholder.empty()
+                st.write(summary)
+                st.session_state.direction_summary_stored[str(st.session_state.direction_params)] = summary
+
+                st.caption("The information is powered by OpenRouteService.")
+            else:
+                placeholder.empty()
+                st.write(message)
+                st.write("Do you want to re-enter these field?")
+                cols = st.columns(9)  # create 2 columns
+                with cols[0]:
+                    if st.button("No"):
+                        self.reset()    
+                with cols[8]:
+                    if st.button("Yes"):
+                        st.session_state.direction_substep += 1
+                        st.rerun()
     
     def reprompt(self):
         if self.substep < self.keys_length + len(st.session_state.direction_invalid_fields) + 1:

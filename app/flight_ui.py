@@ -19,6 +19,8 @@ class FlightInfo:
             st.session_state.flight_invalid_fields = []
         if "flight_preference" not in st.session_state:
             st.session_state.flight_preference = ""
+        if "flight_summary_stored" not in st.session_state:
+            st.session_state.flight_summary_stored = {}
             
         self.substep = st.session_state.flight_substep
         self.future_flight = st.session_state.future_flight
@@ -86,25 +88,31 @@ class FlightInfo:
         self.present_input()
         placeholder = st.empty() 
         placeholder.markdown("## ⏳ Loading... Please wait")
-        validity, message, st.session_state.flight_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "flight", st.session_state.flight_params)
-        if validity == True:
-            travel_info = self.future_flight.get_future_flight_schedules(st.session_state.flight_params)
-            summary = tools.generate_travel_info_search_summary(self.llm.llm, "flight", travel_info, st.session_state.flight_params)
+        if str(st.session_state.flight_params) in st.session_state.flight_summary_stored.keys():
             placeholder.empty()
-            st.write(summary)
+            st.write(st.session_state.flight_summary_stored[str(st.session_state.flight_params)])
             st.caption("The information is powered by aviationstack.")
         else:
-            placeholder.empty() 
-            st.write(message)
-            st.write("Do you want to re-enter these field?")
-            cols = st.columns(9)  # create 2 columns
-            with cols[0]:
-                if st.button("No"):
-                    self.reset()
-            with cols[8]:
-                if st.button("Yes"):
-                    st.session_state.flight_substep += 1
-                    st.rerun()
+            validity, message, st.session_state.flight_invalid_fields = tools.validate_user_input_single_api_call_app(self.llm.llm, "flight", st.session_state.flight_params)
+            if validity == True:
+                travel_info = self.future_flight.get_future_flight_schedules(st.session_state.flight_params)
+                summary = tools.generate_travel_info_search_summary(self.llm.llm, "flight", travel_info, st.session_state.flight_params)
+                placeholder.empty()
+                st.write(summary)
+                st.session_state.flight_summary_stored[str(st.session_state.flight_params)] = summary
+                st.caption("The information is powered by aviationstack.")
+            else:
+                placeholder.empty() 
+                st.write(message)
+                st.write("Do you want to re-enter these field?")
+                cols = st.columns(9)  # create 2 columns
+                with cols[0]:
+                    if st.button("No"):
+                        self.reset()
+                with cols[8]:
+                    if st.button("Yes"):
+                        st.session_state.flight_substep += 1
+                        st.rerun()
 
         
     def reprompt(self):
