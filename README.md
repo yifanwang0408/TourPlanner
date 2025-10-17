@@ -1,6 +1,7 @@
 # TourPlanner
 Tour Planner using LLMs
-
+This is a fork of [the original repo]https://github.com/TechX-Resources/TourPlanner 
+I significantly contributed to the project by integrating OpenAI LLM, LangChain framework, Prompt engineering, and external travel related APIs to deliver personalized and real-time itineraries.
 ---
 # Background:
 Travel and tours appeal to a vast global market, with millions, if not billions, of individuals embarking on trips, vacations, and business travel annually. Despite the widespread desire to explore, the process of planning a trip is frequently characterized by significant challenges and confusion, particularly for those new to independent travelers. There are many variables that one needs to account for and it can get hectic and strenuous to keep track of everything.
